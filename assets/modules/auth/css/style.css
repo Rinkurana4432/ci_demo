@@ -1,0 +1,122 @@
+/* ----------------- style ------- */
+
+.resetpsd_form {
+    z-index: 21;
+    opacity: 0;
+    width: 100%;
+}
+.resetpsd_form {
+    position: absolute;
+    top: 0;
+    width: 100%;
+}
+
+#resetreqpsd:target~.login_wrapper .login_form, #changepassword:target~.login_wrapper .confirmpsd_form {
+    animation-name: fadeOutLeft;
+}
+
+/* #signin:target~.login_wrapper .login_form {
+    z-index: 22;
+    animation-name: fadeInLeft;
+    animation-delay: .1s;
+}*/
+
+
+#resetreqpsd:target~.login_wrapper .resetpsd_form {
+    z-index: 23;
+    animation-name: fadeInLeft;
+    animation-delay: .1s;
+}
+
+
+/* -----------------change password style ------- */
+
+.confirmpsd_form {
+    z-index: 21;
+    opacity: 0;
+    width: 100%;
+}
+.confirmpsd_form {
+    position: absolute;
+    top: 0;
+    width: 100%;
+}
+
+#changepassword:target~.login_wrapper .resetpsd_form, #changepassword:target~.login_wrapper .login_form {
+    animation-name: fadeOutLeft;
+}
+
+/* #signin:target~.login_wrapper .login_form {
+    z-index: 22;
+    animation-name: fadeInLeft;
+    animation-delay: .1s;
+}*/
+
+
+#changepassword:target~.login_wrapper .confirmpsd_form {
+    z-index: 25;
+    animation-name: fadeInLeft;
+    animation-delay: .1s;
+}
+
+
+
+.lspl-form {
+	width: 75%;
+	margin: 0 0 20px 0;
+}	
+
+/* ------------------- Form Styling -------------------- */
+
+.logo-space {
+    padding: 25px 0;
+    text-align: center;
+    min-width: 280px;
+	background: #F75151;
+}
+
+.logo-space h3 {
+	font-family: 'Oleo Script';
+	color: #000;
+}
+
+.creative {
+    background: #fff;
+    box-shadow: 10px 10px 50px #8a8989;
+}
+
+.login_content {
+	padding: 25px;
+}
+
+.separator {
+	padding-top: 20px;
+}
+
+.login_content form{
+	margin-bottom: 0;
+}
+
+.login_content h1 {
+     font-size: 20px; 
+    color: #2C3A61;
+}
+
+.form-copy {
+    padding: 10px 0;
+    text-align: center;
+    min-width: 280px;
+	background: #F75151;
+	color: #fff;
+    font-size: 13px;
+}
+.login_content .lspl-form{background-color: #2C3A61 !important; color: #fff;} 
+.item.bad .alert {
+    
+    white-space: normal;
+}
+/* ------------- toggle css ------------ */
+#signup:target~.login_wrapper .login_form, #signin:target~.login_wrapper .registration_form, #changepassword:target~.login_wrapper .login_form, #resetreqpsd:target~.login_wrapper .login_form {
+    display: none;
+}
+

@@ -1,0 +1,55 @@
+#inventory_add_modal .prod_title {
+    margin-bottom: 15px;
+}
+.product_price h3 {
+    font-size: 33px;
+    font-weight: 400;
+    color: 
+    #26B99A;
+    margin: 0;
+}
+
+.product_gallery .view-first {
+    width: 90px;
+    height: 90px;
+    float: left;
+    margin: 10px;
+    border: 1px solid 
+    #e5e5e5;
+}
+.product_gallery .view-first img{width: 100%;
+margin-top: 15px;}
+
+#inventory_add_modal  small {
+    color:#ff6a00;
+font-size: 13px;}
+#tab_content1 ul,#tab_content2 ul{
+    list-style: none;
+    padding-left: 15px;
+    font-size: 15px;
+}
+#myTabContent h3 {
+    border-bottom: 2px dashed 
+    #E0E0E0;
+    padding-bottom: 15px;
+}
+#tab_content1 li ,#tab_content2 li{padding: 7px 20px 7px 0px;
+line-height: 1.4;
+color:#ff6a00;
+border-bottom: 1px solid #e0e0e0;
+overflow: hidden;}
+	
+#tab_content1 li div,#tab_content2 li div{float: left; color:#73879C;}
+
+
+
+
+
+
+
+
+
+
+
+
+

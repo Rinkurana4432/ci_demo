@@ -1,0 +1,75 @@
+<form method="post" class="form-horizontal" action="<?php echo base_url(); ?>quality_control/update_instrument" enctype="multipart/form-data" id="InstrumentDetail" novalidate="novalidate" style="">	<?php foreach($ins as $data){?>	
+<div class="col-md-12 col-sm-12 col-xs-12 ">
+     <input type="hidden" name="id" value="<?php echo $data->id; ?>"/>	
+				<div class="item form-group">
+					<label class="col-md-3 col-sm-3 col-xs-12" >Name <span class="required">*</span>
+					</label>
+					<div class="col-md-3 col-sm-3 col-xs-6">
+				<input id="para" class="form-control col-md-7 col-xs-12" name="name"  required="required" type="text" value="<?php echo $data->name; ?>">		
+					</div>
+				</div>
+				<div class="item form-group">
+					<label class="col-md-3 col-sm-3 col-xs-12" >Range</label>
+						<div class="col-md-3 col-sm-3 col-xs-6">
+						<input id="ins" class="form-control col-md-7 col-xs-12" name="ins_range" type="number" value="<?php echo $data->ins_range; ?>">
+						</div>
+				</div>
+				<div class="item form-group">
+					<label class="col-md-3 col-sm-3 col-xs-12" >Least Count</label>
+						<div class="col-md-3 col-sm-3 col-xs-6">
+						<input class="form-control col-md-7 col-xs-12" name="least_count"  type="number" value="<?php echo $data->least_count; ?>">
+						</div>
+				</div>
+				<div class="item form-group">
+					<label class="col-md-3 col-sm-3 col-xs-12">Date of Purchase</label>
+						<div class="col-md-3 col-sm-3 col-xs-6">
+						<input class="form-control col-md-7 col-xs-12" name="date_of_purchase" type="date" value="<?php echo $data->date_of_purchase; ?>">
+						</div>
+				</div>
+				<div class="item form-group">
+					<label class="col-md-3 col-sm-3 col-xs-12">Last Calibrated on</label>
+						<div class="col-md-3 col-sm-3 col-xs-6">
+						<input class="form-control col-md-7 col-xs-12" name="last_calibrated_on" type="date" value="<?php echo $data->last_calibrated_on; ?>">
+						</div>
+				</div>	
+				<div class="item form-group">
+					<label class="col-md-3 col-sm-3 col-xs-12">Calibrated Due Date</label>
+						<div class="col-md-3 col-sm-3 col-xs-6">
+						<input class="form-control col-md-7 col-xs-12" name="calibration_due_date" type="date" value="<?php echo $data->calibration_due_date; ?>">
+						</div>
+				</div>
+				<div class="item form-group">
+					<label class="col-md-3 col-sm-3 col-xs-12">Instrument Assign to</label>
+						<div class="col-md-3 col-sm-3 col-xs-6">
+						<input class="form-control col-md-7 col-xs-12" name="ins_assign_to" type="text" value="<?php echo $data->ins_assign_to; ?>">
+						</div>
+				</div>	
+				<div class="item form-group">
+				    <input type="hidden" name="image" value="<?php echo $data->calibration_certificate; ?>"/>
+					<label class="col-md-3 col-sm-3 col-xs-12">Upload Calibration Certificate</label>
+						<div class="col-md-3 col-sm-3 col-xs-6">
+                        <?php if($data->calibration_certificate!=''){
+							$ext = pathinfo($data->calibration_certificate, PATHINFO_EXTENSION);
+							if($ext=='pdf'||$ext=='xml'||$ext=='doc'){
+                            echo $data->calibration_certificate;
+                           
+							}else{
+							?>
+						    <img src="<?php echo base_url();?>assets/modules/quality_control/uploads/<?php echo $data->calibration_certificate;?>" height="100" width="100"/>
+                            <?php } }?>
+						<input class="form-control col-md-7 col-xs-12" name="calibration_certificate" type="file">
+						</div>
+				</div>	
+							
+</div>
+	<input type="hidden" name="logged_in_user" value="<?php echo $_SESSION['loggedInUser']->c_id; ?>" id="loggedInUserId">
+	<center>
+	    	<div class="modal-footer">
+						  <button type="button" class="btn edit-end-btn" data-dismiss="modal">Close</button>							  
+						  <input type="submit" class="btn btn edit-end-btn " value="Submit">
+						</div>
+	</center>
+<?php }?>	
+	</form>
+
+                        

@@ -1,0 +1,115 @@
+.img-holder {z-index:9999;
+    position:relative;
+    min-height:109px;
+ }
+#mask,#pic {
+    position:absolute;
+    z-index:1;
+    left:0;
+    right:0;
+    margin:auto;
+    width:80px;
+    padding:4px;
+    border:1px solid #006000;
+    background-color:#fff;
+    box-shadow:5px 5px 5px #666;
+    outline:0;
+    cursor:pointer;
+ }
+#mask {
+    z-index:3;
+    width:80px;
+    height:80px;
+    padding:0;
+    border:0;
+    background-color:transparent;
+    box-shadow:none;
+ }
+#mask:focus~#pic  {
+    -webkit-animation:newsize 1s forwards;
+    animation:newsize 1s forwards;
+ }
+#mask:focus{
+    -webkit-animation:masksize 1s forwards;
+    animation:masksize 1s forwards;
+ }
+#pic:focus  {
+    -webkit-animation:oldsize 1s forwards;
+    animation:oldsize 1s forwards;
+ }
+@-webkit-keyframes newsize {
+  from {
+    width:100px;
+    padding:4px;
+    border:1px solid #006000;
+    box-shadow:5px 5px 5px #666;
+  }
+  to {
+    width:300px;
+    padding:12px;
+    border:3px solid #006000;
+    box-shadow:15px 15px 15px #666; 
+  }
+ }
+@keyframes newsize {
+  from {
+    width:100px;
+    padding:4px;
+    border:1px solid #006000;
+    box-shadow:5px 5px 5px #666;
+  }
+  to {
+    width:300px;
+    padding:12px;
+    border:3px solid #006000;
+    box-shadow:15px 15px 15px #666; 
+  }
+ }
+@-webkit-keyframes masksize {
+  from {
+    width:100px;
+    height:143px; 
+  }
+  to {
+    width:0;
+    height:0;
+  }
+ }
+@keyframes masksize {
+  from {
+    width:100px;
+    height:143px; 
+  }
+  to {
+    width:0;
+    height:0;
+  }
+ }
+@-webkit-keyframes oldsize {
+  from {
+    width:300px;
+    padding:12px;
+    border:3px solid #006000;
+    box-shadow:15px 15px 15px #666; 
+  }
+  to {
+    width:100px;
+    padding:4px;
+    border:1px solid #006000;
+    box-shadow:5px 5px 5px #666;
+  }
+ }
+@keyframes oldsize {
+  from {
+    width:300px;
+    padding:12px;
+    border:3px solid #006000;
+    box-shadow:15px 15px 15px #666; 
+  }
+  to {
+    width:100px;
+    padding:4px;
+    border:1px solid #006000;
+    box-shadow:5px 5px 5px #666;
+  }
+ }

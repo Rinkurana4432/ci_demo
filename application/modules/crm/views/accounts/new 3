@@ -1,0 +1,18 @@
+CRM Pending Tasks
+
+
+Sale Target 
+---------
+Date Range picker functionality is not working properly.
+
+CRM Lead Color Change
+-------
+Previous status should not be changed if moved to next status
+
+Accounts 
+--------
+Checkbox should be provided to mark same as above address.
+
+Contacts
+--------
+Mailing Address; Same as above option should be added.

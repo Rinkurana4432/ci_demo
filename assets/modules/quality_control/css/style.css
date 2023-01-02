@@ -1,0 +1,113 @@
+
+
+.kanban-col {
+    width: 295px;
+    margin-right: 20px;
+    float: left;
+}
+
+.kanban-centered .kanban-entry .kanban-entry-inner .kanban-label {
+    position: relative;
+    background: #f5f5f6;
+    padding: 0.75em;
+    /* margin-left: 50px; */
+    -webkit-background-clip: padding-box;
+    -moz-background-clip: padding;
+    background-clip: padding-box;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+}
+
+.kanban-centered .kanban-entry {
+    position: relative;
+    margin: 10px 8px;
+    clear: both;
+    border-radius: 4px;
+    -webkit-box-shadow: 1px 1px 2px 0px rgba(50, 50, 50, 0.5);
+    -moz-box-shadow: 1px 1px 2px 0px rgba(50, 50, 50, 0.5);
+    box-shadow: 1px 1px 2px 0px rgba(50, 50, 50, 0.5);
+}
+.kanban-col .panel-body {
+    padding: 0px;
+
+
+   }
+  .kanban-col .panel-body {
+    height: auto !important;
+    min-height: 100px;
+    max-height: inherit !important;
+}
+
+.ceracl-img .btn-view {
+    border: 3px solid #ffff;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    overflow: hidden;
+    background: #ed9c2c!important;
+    color: #192A4D;
+	font-weight: bold;
+}
+.ceracl-img:hover {overflow:hidden;
+    position: relative;
+    z-index: 9;
+}
+.ceracl-img {
+    margin-left: -16px;
+}
+/*edit-page*/
+
+
+
+/*my css*/
+
+.rr span {
+    background: EAEEF3;
+    border: 1px solid;
+    padding: 5px;
+}
+.rr lable {
+    background: #D6DCE4;
+    border: 1px solid;
+    padding: 5px;
+}
+.rr lable, .rr span {
+    width: 50%;
+    float: left;
+}
+.rr {
+    clear: both;
+    width: 16%;
+    font-size: 15px;
+    float: right;
+}
+p.ee {
+    background-color: rgb(196, 190, 228);
+    box-sizing: border-box;
+    color: rgb(64, 50, 148);
+    display: inline-block;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1;
+    max-width: 100%;
+    text-transform: uppercase;
+    vertical-align: baseline;
+    border-radius: 3px;
+    padding: 2px 5px 3px;
+}
+
+.kanban-centered .kanban-entry .kanban-entry-inner .kanban-label{box-shadow: rgba(0, 0, 0, 1) 1px 1px 9px -4px; background: #fff;	}
+
+.modal-content{display:table !important;}
+.datePick-right .addBtn {
+    padding: 6px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    background-color: #007fb1;
+    color: #ffff;
+}
+.datePick-right {
+    float: right;
+    line-height: 0px;
+}

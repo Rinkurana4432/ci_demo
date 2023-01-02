@@ -1,0 +1,199 @@
+<div class="x_content">
+   <?php
+      if ($this->session->flashdata('message') != '') {
+          echo '<div class="alert alert-info">' . $this->session->flashdata('message') . '</div>';
+      }
+      $this->companyGroupId = (isset($_SESSION['companyGroupSessionId']) && $_SESSION['companyGroupSessionId']!='' && $_SESSION['companyGroupSessionId'] != 0)?$_SESSION['companyGroupSessionId']:$_SESSION['loggedInUser']->c_id ;
+      ?>
+   <div class="col-md-12 col-xs-12 for-mobile">
+      <div class="Filter Filter-btn2">
+         <form class="form-search" method="post" action="<?=base_url() ?>inventory/reorder_level">
+            <div class="col-md-6">
+               <div class="input-group">
+                  <span class="input-group-addon">
+                  <i class="ace-icon fa fa-check"></i>
+                  </span>
+                  <input type="text" class="form-control search-query" placeholder="Enter Report ID" name="search" id="search" value="<?php if (!empty($_GET['search'])) echo $_GET['search']; ?>" data-ctrl="inventory/reorder_level">
+                  <span class="input-group-btn">
+                  <button type="submit" class="btn btn-purple btn-sm">
+                  <span class="ace-icon fa fa-search icon-on-right bigger-110"></span>
+                  Search
+                  </button>	
+                  <a href="<?php echo base_url(); ?>inventory/reorder_level"><input type="button" name="submitSearchReset" class="btn btn-outline-secondary" value="Reset"></a>
+                  </span>
+               </div>
+            </div>
+         </form>
+         <form class="form-search" id="orderby" method="post" action="<?=base_url() ?>inventory/reorder_level">
+            <input type="hidden" name="order" id="order" value="<?php if (isset($_POST['order']) == '' || $_POST['order'] == 'desc') { echo 'asc'; } else { echo 'desc'; } ?>">
+         </form>
+      </div>
+   </div>
+   <div class="row hidde_cls export_div">
+      <div class="col-md-12">
+         <?php /**	<div class="col-md-3 datePick-left">  
+            <input type="hidden" value='termscond' id="table" data-msg="Terms & Conditions" data-path="crm/crmterms_condtn"/>
+            <input type="hidden" value='termscond' id="favr" data-msg="Terms & Conditions" data-path="crm/crmterms_condtn" favour-sts="1"/>            
+            <fieldset>
+            <div class="control-group">
+              <div class="controls">
+            	<div class="input-prepend input-group">
+            	  <span class="add-on input-group-addon"><i class="glyphicon glyphicon-calendar fa fa-calendar"></i></span>
+            	<?php /*  <input type="text" style="width: 200px" name="reservation" id="reservation" class="form-control" value="" data-table="crm/termscond"> */ ?>
+         <?php /**	  <input type="text" style="width: 200px" name="tabbingFilters" id="tabbingFilters" class="form-control" value="" data-table="crm/crmterms_condtn">
+            </div>
+             </div>
+            </div>
+            </fieldset>
+            </div>	**/?>	
+         <div class="btn-group">	
+            <button type="button" class="btn btn-success addBtn" data-toggle="modal" data-target=".bs-example-modal-lg" data-tooltip ="Generate Report">Generate Report</button>
+         </div>
+      </div>
+   </div>
+   <p class="text-muted font-13 m-b-30"></p>
+   <div id="print_div_content">
+      <!---------- datatable-buttons ------------->
+      <table id="" class="table table-striped table-bordered account_index" data-id="account" style="margin-top:40px;">
+         <thead>
+            <tr>
+               <th scope="col">Id<span><a href="<?php echo base_url(); ?>inventory/reorder_level?sort=asc" class="up"></a>
+                  <a href="<?php echo base_url(); ?>inventory/reorder_level?sort=desc" class="down"></a></span>
+               </th>
+               <th scope="col">Report Date<span><a href="<?php echo base_url(); ?>inventory/reorder_level?sort=asc" class="up"></a>
+                  <a href="<?php echo base_url(); ?>inventory/reorder_level?sort=desc" class="down"></a></span>
+               </th>
+               <th scope="col">No. of Items<span><a href="<?php echo base_url(); ?>inventory/reorder_level?sort=asc" class="up"></a>
+                  <a href="<?php echo base_url(); ?>inventory/reorder_level?sort=desc" class="down"></a></span>
+               </th>
+               <th scope="col">Action</th>
+            </tr>
+         </thead>
+         <tbody>
+            <?php if (!empty($reorder_level)) {
+               foreach ($reorder_level as $reorderlevel) {
+               		$action = '<a href="javascript:void(0)" id="'.$reorderlevel['id'].'" data-id="reorder_level_report" data-tooltip="view & Generate Report" class="inventory_tabs btn btn-edit  btn-xs"><i class="fa fa-eye"></i></a>';
+               		$action .= '<a href="javascript:void(0)" id="'.$reorderlevel['id'].'" data-id="convert_to_pi" data-tooltip="Convert to Purchase Indent" class="inventory_tabs btn btn-edit  btn-xs"><img src="'.base_url().'assets/modules/crm/uploads/convert.png"></a>';
+               	   echo "<tr>
+               				<td data-label='id:'>" . $reorderlevel['id'] . "</td>
+               				<td data-label='Report Date:'>" . $reorderlevel['report_date'] . "</td>
+               				<td data-label='No. of Items:'>" . $reorderlevel['no_of_items'] . "</td>
+               				<td>". 	$action . "</td>
+               			</tr>";
+               	}
+               } ?> 
+         </tbody>
+      </table>
+      <?php echo $this->pagination->create_links(); ?>	
+	   <div id=":kb" class="J-J5-Ji amH J-JN-I" role="button" aria-expanded="false" tabindex="0" aria-haspopup="true" aria-label="Show more messages" style="user-select: none;">
+  <?php echo $result_count; ?></span></div>
+   </div>
+</div>
+<div id="printThis">
+   <div id="inventory_add_modal" class="modal fade in"  class="modal fade in"  role="dialog" style="overflow:auto;">
+      <div class="modal-dialog modal-large">
+         <div class="modal-content">
+            <div class="modal-header">
+               <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span>
+               </button>
+               <h4 class="modal-title" id="myModalLabel">Purchase Indent</h4>
+            </div>
+            <div class="modal-body-content"></div>
+         </div>
+      </div>
+   </div>
+   <div id="" class="modal fade in"  class="modal fade in"  role="dialog" style="overflow:auto;">
+      <div class="modal-dialog modal-large">
+         <div class="modal-content">
+            <div class="modal-header">
+               <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span>
+               </button>
+               <h4 class="modal-title" id="myModalLabel">Material</h4>
+            </div>
+            <div class="modal-body-content"></div>
+         </div>
+      </div>
+   </div>
+   <div class="modal fade bs-example-modal-lg "  role="dialog" aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-large">
+         <div class="modal-content">
+            <div class="modal-header">
+               <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span>
+               </button>
+               <h4 class="modal-title" id="myModalLabel">Reorder Report Filter</h4>
+            </div>
+            <div class="modal-body">
+               <form action="<?php echo  base_url() ?>inventory/generate_reorder_report" method="post">
+                  <input type="hidden" id="record_id" value="<?php echo isset($reorderlevel['id']); ?>">
+                  <div class="row">
+                     <!--div class="col-md-12 col-sm-6 col-xs-12 form-group add_multiple_location middle-box2">	
+                        <div class="col-md-3 col-sm-12 col-xs-12 form-group">
+                               <label>Branch</label>
+                        	   	<select class="location form-control selectAjaxOption select2 select2-hidden-accessible location" name="branch_name" data-id="company_address" data-key="id" data-fieldname="location" id="branch" width="100%" tabindex="-1" aria-hidden="true" onchange="getArea(event,this);" data-where="created_by_cid=<?php echo $this->companyGroupId; ?>">
+                        	   		<option value="">Select Option</option>
+                        	   </select>
+                        </div>
+                        <div class="item form-group">
+                        	<label class="col-md-3 col-sm-3 col-xs-12" for="materail_type">Material Type<span class="required" style="color:red;">*</span></label>
+                        	<div class="col-md-6 col-sm-6 col-xs-12">
+                        		<select class="form-control selectAjaxOption select2 select2-hidden-accessible materialTypeId" name="material_type_id" data-id="material_type" data-key="id" data-fieldname="name" tabindex="-1" aria-hidden="true" data-where="created_by_cid=<?php echo $this->companyGroupId; ?> OR created_by_cid=0"  id="mattyp" onchange="ChangePrefix_and_subType();">
+                        		<option value="">Select All</option>	
+                        		</select>
+                        	</div>
+                        </div>
+                        <div class="item form-group">
+                        	<label class="col-md-3 col-sm-3 col-xs-12" for="materail_type">Material Sub Type</label>
+                        	<div class="col-md-6 col-sm-6 col-xs-12">
+                        		<select class="subtype form-control" name="sub_type" id="material_subtype">
+                        			<option value="">Select Sub type</option>
+                        		</select>
+                        	</div>
+                        </div>
+                        </div-->
+                     <div class="col-md-12 col-xs-12 col-sm-12">
+					 <div class=" col-md-6 vertical-border">
+                        <div class="item form-group">
+                           <label class="col-md-3">Branch</label>
+						   <div class="col-md-6 col-sm-6 col-xs-12">
+                           <select class="location form-control selectAjaxOption select2 select2-hidden-accessible location chck" name="branch_name" data-id="company_address" data-key="id" data-fieldname="location" id="branch" width="100%" tabindex="-1" aria-hidden="true" onchange="getArea(event,this);" data-where="created_by_cid=<?php echo $this->companyGroupId; ?>">
+                              <option value="">Select Option</option>
+                           </select>
+						   </div>
+                        </div>
+                        <div class="item form-group">
+                           <label class="col-md-3" for="materail_type">Material Type<span class="required" style="color:red;">*</span></label>
+                           <div class="col-md-6 col-sm-6 col-xs-12">
+                              <select class="form-control selectAjaxOption select2 select2-hidden-accessible materialTypeId chck" name="material_type_id" data-id="material_type" data-key="id" data-fieldname="name" tabindex="-1" aria-hidden="true" data-where="created_by_cid=<?php echo $this->companyGroupId; ?> OR created_by_cid=0"  id="mattyp" onchange="ChangePrefix_and_subType();" required
+                                 >
+                                 <option value="">Select All</option>
+                              </select>
+                           </div>
+                        </div>
+						</div>
+						<div class=" col-md-6 vertical-border">
+                        <div class="item form-group">
+                           <label class="col-md-3" for="materail_type">Material Sub Type</label>
+                           <div class="col-md-6 col-sm-6 col-xs-12">
+                              <select class="subtype form-control" name="sub_type" id="material_subtype">
+                                 <option value="">Select Sub type</option>
+                              </select>
+                           </div>
+                        </div>
+						</div>
+                     </div>
+                     <Center>
+                        <input type="submit" class="btn btn-warning submitCompanyBtn" value="Submit"> 
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        <button type="reset" class="btn btn-default">Reset</button>	
+                     </center>
+               </form>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>
+<script>
+   var measurementUnits = '';
+</script>
+<!---------- Small Modal ---------------- -->

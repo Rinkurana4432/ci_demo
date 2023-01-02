@@ -1,0 +1,113 @@
+<div class="row"> 
+<?php if($this->session->flashdata('message') != ''){
+      echo '<div class="alert alert-info">'.$this->session->flashdata('message').'<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button></div>';		
+
+   }?>  
+
+
+   <div class="Process-card">
+      <div class="col-md-6 col-xs-12 label-left">
+         <div class="col-md-12 col-sm-12 col-xs-12 form-group">
+            <label for="material">Sale Order Number</label>
+            <div class="col-md-6 col-sm-12 col-xs-6 form-group">
+               <div><?php echo $work_order->sale_order_no; ?></div>
+            </div>
+         </div>
+      </div> 
+      <div class="col-md-6 col-xs-12 label-left">
+         <div class="col-md-12 col-sm-12 col-xs-12 form-group">
+            <label for="material">Expected Delivery Date</label>
+            <div class="col-md-6 col-sm-12 col-xs-6 form-group">
+               <div><?php echo $work_order->expected_delivery_date; ?></div>
+            </div>
+         </div>
+      </div> 
+      <div class="col-md-6 col-xs-12 label-left">
+         <div class="col-md-12 col-sm-12 col-xs-12 form-group">
+            <label for="material">Work Order No</label>
+            <div class="col-md-6 col-sm-12 col-xs-6 form-group">
+               <div><?php echo $work_order->work_order_no; ?></div>
+            </div>
+         </div>
+      </div>
+      <div class="col-md-6 col-xs-12 label-left">
+         <div class="col-md-12 col-sm-12 col-xs-12 form-group">
+            <label for="material">Work Order Name</label>
+            <div class="col-md-6 col-sm-12 col-xs-6 form-group">
+               <div><?php echo $work_order->workorder_name; ?></div>
+            </div>
+         </div>
+      </div>               
+   </div>
+</div>
+<div class="row">   <?php 
+                  
+                
+                  ?>
+   <h3 class="Material-head">Materials</h3>
+   <table class="table table-striped maintable" id="mytable">
+         <thead>
+            <tr>
+               <th>Material Type</th>
+               <th>Material Name</th>
+               <th>Quantity Required</th>
+               <th>WO Reserved Quantity</th>
+               <th>Available Quantity</th>
+               <th>Order Quantity</th>
+               <th>Date</th>
+               <th>Reserve</th>
+               <th>Action</th>
+            </tr>
+         </thead>
+         <tbody>
+         <?php if($materials_data):
+       //pre($materials_data);die();   
+                 foreach($materials_data as $materialInfo): 
+                  //pre($materialInfo);
+                  $materialName     = getNameById('material',$materialInfo['material_name_id'],'id');  
+                  //pre($materialName);die();
+                  $productDetails   = getNameById('material_type',$materialInfo['material_type_id'],'id');
+                  //pre($quantity_order);die();
+                  $quantity_order   = getNameById('purchase_indent',$materialInfo['work_orer_id'],'sale_order_id');
+                 // pre($quantity_order);die();
+                    $materiyalData  = json_decode($quantity_order->material_name,true);
+                   // pre($materiyalData); die('dsfsdfsd');
+         ?>
+            <tr>
+               <input type="hidden" class="material_type" name="material_type" value="<?php  echo $materialInfo['material_type_id']; ?>">
+               <input type="hidden" class="material_id" name="material_id" value="<?php  echo $materialInfo['material_name_id']; ?>">
+               <input type="hidden" class="work_order_id" name="work_order_id" value="<?php  echo $materialInfo['work_orer_id']; ?>">
+               <input type="hidden" class="job_card_id" name="job_card_id" value="<?php  echo $materialInfo['job_card_id']; ?>">   
+               <td> <?php  if(!empty($productDetails)){ echo $productDetails->name; }else{echo "N/A";} ?></td>
+               <td> <?php  if(!empty($materialName)){echo $materialName->material_name;}else{echo "N/A";} ?></td>
+               <td class="__quantityRequired"> <?php  echo $materialInfo['quantity_required']; ?></td>
+               <td> <?php  echo $materialInfo['reserved_quantity']; ?></td>
+               <td class="__availableQuantity"> <?php  echo $materialInfo['available_quantity']; ?></td>
+
+              
+               <td > <?php   
+			   foreach($materiyalData as $getalldata){ 
+				   if($materialInfo['material_type_id'] == $getalldata['material_type_id']){
+					   echo $getalldata['quantity'];
+					   }
+					}
+				?></td>
+               <td > <?php  if ($quantity_order->required_date) {   echo $quantity_order->required_date;  }else{ echo'Order Not Placed'; } ?></td>
+
+
+
+               <td><a class="btn btn-view btn-xs __reservedQuantity <?php  if($materialInfo['reserved_quantity'] > 0) { echo 'disabled'; }  ?>"><i class="fa fa-plus"></i></a></td>
+               <td>
+                  <select name="action" class="action_materials form-control">
+                     <?php  if(($materialInfo['reserved_quantity'] > 0) && ($materialInfo['available_quantity'] + $materialInfo['reserved_quantity']  >= $materialInfo['quantity_required'])) { ?>     
+                        <option selected>In Stock</option>
+                     <?php }elseif(($getalldata['quantity'] > 0) && ($getalldata['quantity'] + $materialInfo['available_quantity'] + $materialInfo['reserved_quantity']  >= $materialInfo['quantity_required'])) { ?> <option selected >Expected</option> <?php }else { ?>   
+                        <option selected >Not Available</option>
+                     <?php } ?>   
+                  </select>
+               </td>   
+            </tr>
+         <?php  endforeach; else: echo '<tr><td>No Material Found.</td></tr>'; endif; ?>
+         </tbody>
+   </table>
+  </div> 

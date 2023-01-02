@@ -1,0 +1,74 @@
+$(document).on("ready",function(){
+	init_select2();
+	
+	$(document).on("click",".notification_icon",function(){		
+		var currenElement = $(this);
+		if(currenElement.find("span").length > 0){
+			$.ajax({
+				type: "POST",
+				url: site_url+"Ajaxrequest/readNotifications",
+				data: {}, 
+				success: function(data){
+				   if(data) {	   
+					 currenElement.find("span").remove();				 
+				   }
+				}
+			}); 
+		}
+	});
+});
+
+/* for select 2 ajax search */
+function init_select2() {
+	$('.selectAjaxOption').select2({
+		//dropdownCssClass: 'custom-dropdown'
+		allowClear: true,
+        placeholder: 'Select And Begin Typing',
+		//multiple:true,
+        ajax: {
+			url: site_url+'Ajaxrequest/ajaxSelect2search',
+			dataType: 'json',
+			delay: 250,
+			data: function (params) {
+            return {
+                q: params.term,
+                table: $(this).attr("data-id"),
+                field: $(this).attr("data-key"),
+                fieldname: $(this).attr("data-fieldname"),
+                fieldwhere: $(this).attr("data-where")
+            };
+        },		  
+        processResults: function (data) {
+            return {
+              results: data
+            };
+        },
+			cache: true,
+         }//,language: {
+                    // noResults: function() {
+                        // return "<a  data-toggle='modal' data-target='#myModal' href='javascript:void();'>Open Model</a>";
+                      // }
+                    // },escapeMarkup: function (markup) {
+                         // return markup;
+                    // }
+    });
+	
+}
+
+$(".tagsAjaxOption").select2({
+    tags: true,
+    tokenSeparators: [',', ' '],
+       ajax: {
+			url: site_url+'Ajaxrequest/ajaxTagSearch',
+			dataType: 'json',
+			delay: 250,		  
+        processResults: function (data) {
+            return {
+              results: data
+            };
+        },
+			cache: true
+        }
+})
+
+$('.selectOption').select2();

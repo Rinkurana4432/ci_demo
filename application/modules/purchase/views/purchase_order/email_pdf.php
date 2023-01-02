@@ -1,0 +1,357 @@
+<?php
+$company_data = getNameById('company_detail',$dataPdf->created_by_cid,'id'); 
+
+	$get_company_unit = json_decode($company_data->address,true);
+	$company_GSTNO='';
+	foreach($get_company_unit as $get_comp_gst){
+		 
+		if($get_comp_gst['add_id'] == $dataPdf->company_unit){
+			$company_GSTNO = $get_comp_gst['company_gstin'];
+
+		}
+	}
+
+	$companyLogo = base_url().'assets/modules/company/uploads/'.$company_data->logo;
+	// pre($companyLogo);die();
+	//$obj_pdf->Image($companyLogo,2,4,10,10,'PNG');
+	// $imagesign = base_url().'assets/modules/crm/uploads/signature5c0b5d8fa371e.png';
+	//$obj_pdf->Image($imagesign,2,4,10,10,'PNG');
+						
+    $supplierName=getNameById('supplier',$dataPdf->supplier_name,'id');	
+    $state= getNameById('state',$supplierName->state,'state_id');
+  //  $obj_pdf->AddPage(); 
+  	setlocale(LC_MONETARY, 'en_IN');
+    $content = ''; 
+	#echo $companyLogo; die;
+	$this->companyGroupId = (isset($_SESSION['companyGroupSessionId']) && $_SESSION['companyGroupSessionId']!='' && $_SESSION['companyGroupSessionId'] != 0)?$_SESSION['companyGroupSessionId']:$_SESSION['loggedInUser']->c_id ;
+	$brnch_name = getNameById_with_cid('company_address', $dataPdf->delivery_address, 'id','created_by_cid',$this->companyGroupId);
+	$materialDetail =  json_decode($dataPdf->material_name);
+
+	$subTotal=0;
+	 $content .= '';
+	$count=0;
+	$mat_count = '';	//$material_detail
+	$data2 = array();
+	 
+             	foreach($materialDetail as $material_detail){
+					
+					 // pre($material_detail);
+             		 
+                $data2[$count]['material_type_id_'.$count] =  $material_detail->material_type_id ;
+				$data2[$count]['material_name_id_'.$count] =  $material_detail->material_name_id ;
+				$data2[$count]['description_'.$count] =  $material_detail->description ;
+				$data2[$count]['uom_'.$count] =  $material_detail->uom ;				
+				$data2[$count]['hsnCode'.$count] =  $material_detail->hsnCode ;				
+				$data2[$count]['hsnId_'.$count] =  $material_detail->hsnId ;				
+				$data2[$count]['quantity_'.$count] =  $material_detail->quantity ;				 				
+				$data2[$count]['price_'.$count] =  $material_detail->price ;				
+				$data2[$count]['discount_'.$count] =  $material_detail->discount ;				
+				$data2[$count]['sub_tax_'.$count] =  $material_detail->sub_tax ;				
+				$data2[$count]['sub_total_'.$count] =  $material_detail->sub_total;				
+				$data2[$count]['gst_'.$count] =  $material_detail->gst ;				
+				$data2[$count]['total_'.$count] =  $material_detail->total ;				
+				$data2[$count]['remove_mat_id_'.$count] =  $material_detail->remove_mat_id ;				
+				$data2[$count]['remaning_qty_'.$count] =  $material_detail->remaning_qty ;				
+				$data2[$count]['description_check_'.$count] =  $material_detail->description_check ;	
+				$data2[$count]['bom_number_'.$count] =  $material_detail->bom_number;				
+				$data2[$count]['process_name_'.$count] =  $material_detail->process_name ;	
+				$data2[$count]['aliasname_'.$count] =  $material_detail->aliasname ;	
+						
+				$count++;
+                     
+             	}
+				
+				// die();
+   
+             	$divide = $count/45; 
+		      $after_divide =  round($divide);
+		       if($after_divide <=  1){
+			    $after_divide = 1;
+		     }
+		     
+           if ( $count >= 0 ){  //If there are more than 0 terms
+			$k =0;
+			$sno = 1;
+             for ($j = 0; $j < $after_divide; $j++){
+		?>		 
+             
+				<table>
+			        <tr>
+			        	<td  align="center" ><img src="'.$companyLogo.'" alt="test alt attribute" width="60" height="20" border="0" style="padding:0px !important; margin-bottom:-30px !important;"></td>
+			        </tr>
+					<tr>
+						<td colspan="1" > <h2 align="center">PURCHASE ORDER</h2> </td>
+					</tr>
+			
+				</table>
+				<table>
+					 <tr>
+					      <td colspan="8"><strong>GST :</strong><?php echo $company_GSTNO;  ?></td>
+		    			  <td colspan="8" style="text-align:center;"></td>
+		            </tr>
+	           </table>
+	    	<table border="1" cellpadding="2">
+	        <tr>
+	             <td colspan="6"><strong>Order Date :</strong> &nbsp;<?php echo ($dataPdf->date?date("j F , Y", strtotime($dataPdf->date)):''); ?></td>
+				 <td colspan="8"><strong>PO Number :</strong>&nbsp; <?php echo $dataPdf->order_code; ?></td>
+			    </tr>
+			    <tr>
+		         <td colspan="6"><strong>Bill From :</strong><br><br><strong> Vendor Name :</strong> <?php echo $company_data->name; ?><br> <strong>Address :</strong> <?php echo $brnch_name->location; ?><br> <strong>Contact :</strong> <?php echo $company_data->phone; ?><br> <strong>GST No :</strong><?php echo $company_GSTNO; ?><br> </td>
+				
+				<td colspan="5"><strong> </strong><br><br><strong> Supplier  Name :</strong> <?php echo $supplierName->name; ?> <br> <strong>Supplier Address :</strong> <?php echo $supplierName->address; ?><br> <strong>State :</strong><?php echo $state->state_name; ?>  <br> <strong>GST No :</strong> <?php echo $supplierName->gstin; ?></td>
+				<td colspan="5"><strong>Expected Delivery Date  :</strong><br><?php echo ($dataPdf->expected_delivery_date?date("j F , Y", strtotime($dataPdf->expected_delivery_date)):''); ?> <br><strong> Mode / Terms Of Payment :</strong> &nbsp;<br><?php echo $dataPdf->payment_terms; ?> <br><strong> Payment Date :</strong> &nbsp;<br><?php echo ($dataPdf->payment_date?(date("j F , Y", strtotime($dataPdf->payment_date))):''); ?> <br><strong> Terms Of Delivery :</strong> &nbsp;<br><?php echo $dataPdf->terms_delivery; ?> </td>
+		      </tr>
+              <tr><td colspan="16"><b style="font-size:12px; text-align:center;">Product Description</b></td></tr>
+			   <tr>
+					<th rowspan="1" style="text-align:center;"><strong>S No.</strong></th>
+				
+					<th rowspan="1" style="text-align:center;width:130px;" colspan="5"><strong>Material Name</strong></th>
+					<th rowspan="1" style="text-align:center;width:30px;"><strong>Img</strong></th>
+					<th rowspan="1" style="text-align:center;"><strong>Alias</strong></th>
+					<th rowspan="1" style="text-align:center;width:70px;"><strong>HSN/SAC Code</strong></th>
+					<th rowspan="1"  style="text-align:center;"><strong>QTY</strong></th>
+					<th rowspan="1" style="text-align:center;"><strong>UOM</strong></th>
+					<th rowspan="1"  style="text-align:center;width:76px;"><strong>Unit Price </strong></th>
+					
+					<th rowspan="1"  style="text-align:center;width:90px;"><strong>Price in RS</strong></th>
+				
+					
+					<th rowspan="1"  style="text-align:center;width:145px;"><strong>Total Amt.</strong></th>
+			 </tr>
+			 <!--
+			 <th rowspan="1"  style="text-align:center;"><strong>CGST %</strong></th>
+					<th rowspan="1"  style="text-align:center;"><strong>SGST %</strong></th>
+					<th rowspan="1"  style="text-align:center;"><strong>IGST (%)</strong></th>
+		-->
+<?php		
+			 for($i = 0 ;$i<=3;$i++){
+			 	if(!empty($data2[$k]['material_name_id_'.$k])){
+                                                                 
+					$materialtypr=getNameById('material_type',$data2[$k]['material_type_id_'.$k],'id');
+
+					$subTotal += $data2[$k]['sub_total_'.$k];
+					$subTotal_TAX += $data2[$k]['sub_tax_'.$k];
+					$Total+=$data2[$k]['total_'.$k];	
+						$material_id=$data2[$k]['material_name_id_'.$k];
+						$materialName=getNameById('material',$material_id,'id');	
+						$ww =  getNameById('uom', $data2[$k]['uom_'.$k],'id');
+						$uom = !empty($ww)?$ww->ugc_code:'';
+						$cccc= $data2[$k]['price_'.$k];
+						
+					    $dis=$data2[$k]['discount_'.$k];
+					      $disbmnsbndbcountrate=$cccc*$dis/100;
+					      $discountrate=$cccc-$disbmnsbndbcountrate;
+					     $discoutretsub=$data2[$k]['quantity_'.$k]*$discountrate;
+					   
+                       if (!empty($supplierName->gstin)) {
+                                   $code=$supplierName->gstin;
+					               $supplevalue=substr($code,0,2);
+		                           $buyarv=$company_GSTNO;
+							       $valer=substr($buyarv,0,2);
+								   
+								   
+								   
+							    if ($supplevalue==$valer) 
+							  {
+		                	         $sgg=$data2[$k]['gst_'.$k]/2;
+		                	        $gsti= $sgg.' '. '%';
+		                      }else{
+		                	         $gsti=  ' -- ';
+		                       }
+		                       if ($supplevalue!=$valer) {
+                	               $vbcv=$data2[$k]['gst_'.$k];
+                	               $gstis=$vbcv.' '. '%';
+                               }else{
+                	               $gstis=  ' -- ';
+                                }
+                           }elseif(empty($supplierName->gstin)){
+                                $gstis= $data2[$k]['gst_'.$k];
+                              
+                           } 
+
+                           if ($dataPdf->is_purchase_date==1) {
+                             $qut='open';
+                           }else{
+                              $qut= $data2[$k]['quantity_'.$k];
+                           }
+                   //pre($material_detail);
+				   $attachments = $this->purchase_model->get_image_by_materialId('attachments', 'rel_id', $data2[$k]['material_name_id_'.$k]);
+					if(!empty($attachments)){
+						$imgcode = '<img style="width: 50px; height: 37px; " src="'.base_url().'assets/modules/inventory/uploads/'.$attachments[0]['file_name'].'">';
+					}else{
+						$imgcode =  '<img style="width: 50px; height: 37px;" src="'.base_url().'assets/uplodimg/noimage.jpg">';
+					}
+					
+					?>
+					<tr>
+										<td><?php echo $sno++; ?> </td>
+									
+										<td style="width:130px;" colspan="5"><h5><?php echo  getPCode($material_id).'  ' .$materialName->material_name; ?></h5><br><?php echo  $data2[$k]['description_'.$k];?></td>
+                                         <td style="width:30px;"><?php echo  $imgcode; ?> </td>										
+                                         <td><?php echo  $data2[$k]['aliasname_'.$k];?></td>										
+										<td><?php echo  $data2[$k]['hsnCode'.$k];?></td>
+										<td><?php echo  $qut;?> </td>
+										<td><?php echo  $uom;?></td>
+										<td><?php echo  $pricedf = money_format('%!i', $data2[$k]['price_'.$k]);?></td>
+										<td><?php echo $discoutretsub;?></td>
+										<td style="text-align:right;"><?php echo  $totaldf = money_format('%!i',$data2[$k]['total_'.$k]);?></td>
+								</tr>
+<?php 
+								$k++;
+							 
+						}
+					}
+					//die();
+					$sno = $sno-1;
+					$number = $dataPdf->grand_total;
+				   $no = round($number);
+				   $point = round($number - $no, 2) * 100;
+				   $hundred = null;
+				   $digits_1 = strlen($no);
+				   $i = 0;
+				   $str = array();
+				   $words = array('0' => '', '1' => 'One', '2' => 'Two',
+					'3' => 'Three', '4' => 'Four', '5' => 'Five', '6' => 'Six',
+					'7' => 'Seven', '8' => 'Eight', '9' => 'Nine',
+					'10' => 'Ten', '11' => 'Eleven', '12' => 'Twelve',
+					'13' => 'Thirteen', '14' => 'Fourteen',
+					'15' => 'Fifteen', '16' => 'Sixteen', '17' => 'Seventeen',
+					'18' => 'Eighteen', '19' =>'Nineteen', '20' => 'Twenty',
+					'30' => 'Thirty', '40' => 'Forty', '50' => 'Fifty',
+					'60' => 'Sixty', '70' => 'Seventy',
+					'80' => 'Eighty', '90' => 'Ninety');
+				   $digits = array('', 'Hundred', 'Thousand', 'Lakh', 'Crore');
+				   while ($i < $digits_1) {
+					 $divider = ($i == 2) ? 10 : 100;
+					 $number = floor($no % $divider);
+					 $no = floor($no / $divider);
+					 $i += ($divider == 10) ? 1 : 2;
+					 if ($number) {
+						$plural = (($counter = count($str)) && $number > 9) ? 's' : null;
+						$hundred = ($counter == 1 && $str[0]) ? ' and ' : null;
+						$str [] = ($number < 21) ? $words[$number] .
+							" " . $digits[$counter] . $plural . " " . $hundred
+							:
+							$words[floor($number / 10) * 10]
+							. " " . $words[$number % 10] . " "
+							. $digits[$counter] . $plural . " " . $hundred;
+					 } else $str[] = null;
+				  }
+				  $str = array_reverse($str);
+				  $result = implode('', $str);
+				  $points = ($point) ?
+					"." . $words[$point / 10] . " " . 
+						  $words[$point = $point % 10] : '';
+						  if ($company_data->purchase_term_conditions=='') {
+						  	 $terms_condition_dataPdf=$dataPdf->terms_conditions;
+						  }elseif ($company_data->purchase_term_conditions!='') {
+						  	  $terms_condition=$company_data->purchase_term_conditions;
+						  } 
+					if($j == $after_divide-1){
+
+                          $subTotala = money_format('%!i', $subTotal);
+						  ?>
+							<tr>
+				            <td colspan="13" align="right"><strong>Sub Total  </strong> </td>
+				            <td  style="text-align:right;">Rs.<?php echo $subTotala; ?></td>
+			                </tr>
+<?php							
+			    $subTotal_TAXa = money_format('%!i', $subTotal_TAX);
+				 $Totala = money_format('%!i', $Total);
+				 if (!empty($supplierName->gstin)) {
+                                   $code=$supplierName->gstin;
+					               $supplevalue=substr($code,0,2);
+		                           $buyarv=$company_GSTNO;
+							       $valer=substr($buyarv,0,2);
+						if ($supplevalue==$valer){
+		                	$sgg=$subTotal_TAXa/2;
+						?>
+								<tr>
+									<td colspan="13" align="right"><strong>SGST</strong> </td>
+									<td style="text-align:right;" >Rs.<?php echo $sgg;?> </td>
+								</tr>
+							<tr>
+								<td colspan="13" align="right"><strong>CGST</strong> </td>
+								<td style="text-align:right;" >Rs.<?php echo $sgg; ?> </td>
+							</tr>	
+					<?php		
+		              }
+					   if ($supplevalue!=$valer) {
+					?>	  
+						<tr>
+							<td colspan="13" align="right"><strong>IGST</strong> </td>
+							<td style="text-align:right;" >Rs. <?php echo $subTotal_TAXa; ?></td>
+						</tr>
+				<?php		
+					   }
+                }
+				?>
+			  
+			        <tr>
+				        <td colspan="13" align="right"><strong>Total Amount </strong> </td>
+				        <td  style="text-align:right;">Rs.<?php echo $Totala;?> </td>
+				    </tr>
+			<?php		
+				$freights = money_format('%!i', $dataPdf->freight);
+		 	if($dataPdf->terms_delivery == 'To be paid by customer'){
+				?>
+				<tr>
+					<td colspan="13" align="right"><strong>Freight(If Any)</strong> </td>
+					<td  style="text-align:right;">Rs.<?php echo ($freights?$freights:0);?></td>
+				</tr>
+		<?php		
+			}
+			$preparedBy = getNameById('user_detail',$dataPdf->created_by,'u_id'); 
+			$CheckedBy = getNameById('user_detail',$dataPdf->validated_by,'u_id'); 
+			
+			if(empty($CheckedBy)){
+				$checkebyname = 'Pending For Approval';
+			}else{
+				$checkebyname = $CheckedBy->name;
+			}
+			
+			$grand_totals = money_format('%!i', $dataPdf->grand_total);
+			$otherCharge = money_format('%!i', $dataPdf->other_charges);
+			?>
+						<tr>
+							<td colspan="13" align="right"><strong>Other Charges(If Any)</strong> </td>
+							<td style="text-align:right;">Rs.<?php echo($otherCharge?$otherCharge:0);?></td>
+						</tr>
+							 <tr>
+								<td colspan="13" align="right"><strong>Grand Total </strong> </td>
+								<td  style="text-align:right;">Rs. <?php echo  $grand_totals;?></td>
+						    </tr>
+							
+			<?php } ?>
+           	  <tr><td colspan="14">Amount Chargeable(in Words) : <b> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp;<?php echo  $result ;?> Only</b></td></tr>
+				 <?php 
+				 $trmcndtn = strlen($dataPdf->terms_conditions);
+				 if($trmcndtn > 200){
+					 $term_condtion = substr($dataPdf->terms_conditions, 0, 200) . '...';
+				 }else{
+					 $term_condtion = $dataPdf->terms_conditions;
+				 }
+				 
+				 ?>
+				 <tr>
+				    <td colspan="6"><h5>Terms & Conditions</h5> <p><?php echo $term_condtion;?></p> </td>
+					<td colspan="4"><h5>Prepared By</h5>   <br/> <?php echo $preparedBy->name; ?></td>
+					<td colspan="4"><h5>Checked By</h5><br/><?php echo $checkebyname;?></td>
+						   	 
+							</tr>
+			    </table>
+			<table ><br><br><br><br> <tr rowspan="2"><td  align="center"> This is computer generated Purchase Order does not require signature </td></tr></table>
+
+	<?php  
+	   $sno++;
+	}
+  
+   }
+
+				
+
+// $obj_pdf->setPageOrientation('L');
+
+ // $obj_pdf->writeHTML($content);  
+ // ob_end_clean();	
+ // $obj_pdf->Output('PurchaseOrder.pdf', 'I'); 

